@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 
 <desc>
-    <feature name="ZeroCross" window="500" step="250" threshold="10" />
+    <feature name="ZeroCross" window="1000" step="500" deadzone="30" />
     <feature name="RMS" window="500" step="250" />
 </desc>

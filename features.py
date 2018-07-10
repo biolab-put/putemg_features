@@ -42,21 +42,12 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     return feature_frame
 
 
-def feature_ZeroCross(series, window, step, threshold):
-    print("ZeroCross")
-    return pd.Series(np.random.randn(20))
+def feature_ZeroCross(series, window, step, deadzone):
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -deadzone) | (x > deadzone)] > 0)), axis=1, arr=windows_strided)
+    return pd.Series(data=zc, index=series.index[indexes])
 
 
 def feature_RMS(series, window, step):
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sqrt(np.mean(np.square(windows_strided), axis=1)), index=series.index[indexes])
-
-
-if __name__ == '__main__':
-    hdf5 = 'P:\\Data-HDF5\\emg_gestures-01-repeats_short-2018-05-08-15-06-32-389.hdf5'
-    xml = 'all_features.xml'
-
-    r_hdf5 = pd.read_hdf(hdf5)
-    #print(calculate_feature(r_hdf5, 'ZeroCross', window=500, step=250, threshold=10))
-    print(calculate_feature(r_hdf5, name='RMS', window=500, step=250))
-    #print(features_from_xml(xml, hdf5))

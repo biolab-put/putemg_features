@@ -32,7 +32,7 @@ import features as ft
 import pandas as pd
 
 record = pd.read_hdf('emg_gestures-03-repeats_long-2018-05-11-11-05-00-695.hdf5')
-df1 = ft.calculate_feature(record, 'ZeroCross', window=500, step=250, threshold=10)
+df1 = ft.calculate_feature(record, 'ZeroCross', window=1000, step=500, deadzone=30)
 df2 = ft.calculate_feature(record[22.5:30.9], name='RMS', window=500, step=250)
 df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, step=250)
 ```
