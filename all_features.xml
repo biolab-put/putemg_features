@@ -1,6 +1,14 @@
 <?xml version="1.0"?>
 
 <desc>
-    <feature name="ZeroCross" window="1000" step="500" deadzone="30" />
-    <feature name="RMS" window="500" step="250" />
+    <feature name="AAC" window="500" step="250" /> <!--Average Amplitude Change-->
+    <feature name="DASDV" window="500" step="250" /> <!--Difference Absolute Standard Deviation Value-->
+    <feature name="MAV1" window="500" step="250" /> <!--Modified Mean Absolute Value Type 1-->
+    <feature name="MAV2" window="500" step="250" /> <!--Modified Mean Absolute Value Type 2-->
+    <feature name="MAV" window="500" step="250" /> <!--Mean Absolute Value-->
+    <feature name="MAVSLP" window="500" step="250" /> <!--Mean Absolute Value Slope-->
+    <feature name="RMS" window="500" step="250" /> <!--Root Mean Square-->
+    <feature name="VAR" window="500" step="250" /> <!--Variance-->
+    <feature name="ZC" window="1000" step="500" deadzone="30" /> <!--Zero Crossing-->
+
 </desc>
