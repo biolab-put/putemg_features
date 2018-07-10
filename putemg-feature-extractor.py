@@ -32,8 +32,8 @@ if __name__ == '__main__':
         usage()
 
     print('Calculating features for {:s} file'.format(hdf5_file_url))
-    features = features.features_from_xml(xml_file_url, hdf5_file_url)
+    ft = features.features_from_xml(xml_file_url, hdf5_file_url)
 
     output_hfd5_filename = os.path.splitext(os.path.basename(hdf5_file_url))[0] + "_features.hdf5"
     print('Saving result to {:s} file'.format(output_hfd5_filename))
-    features.to_hdf(output_hfd5_filename, 'data', format='table', mode='w', complevel=5)
+    ft.to_hdf(output_hfd5_filename, 'data', format='table', mode='w', complevel=5)

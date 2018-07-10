@@ -4,20 +4,21 @@ import utilities as ut
 import xml.etree.ElementTree as ET
 
 
-def calculate_feature(record, params):
+def calculate_feature(record, name, **kwargs):
     """
     Calculates feature given by params['name'] of given pandas.DataFrame. Feature is calculated for each Series with
     column name of "EMG_\d". Feature parameters are passed by Dict params, eg. {'name': RMS, 'window': 500, 'step': 250}
     :param record: pandas.DataFrame - input DataFrame with data to calculate features from
-    :param params: Dict - parameter dictionary for feature calculation. Must contain at least 'name' entry
-    :return: pandas.DataFrame  - DataFrame containing output of desired feature
+    :param name: string - name of the requested feature
+    :param kwargs: parameters for feature calculation.
+    :return: pandas.DataFrame - DataFrame containing output of desired feature
     """
-    feature_func_name = 'feature_' + params['name']  # Get feature function name based on name
+    feature_func_name = 'feature_' + name  # Get feature function name based on name
     feature_values = pd.DataFrame()  # Create empty DataFrame
 
-    for column in record.filter(regex="EMG_\d").columns:  # For each column containing EMG data (for each Series)
-        feature_label = params['name'] + '_' + column.split('_')[1]  # Prepare feature column label
-        feature_values[feature_label] = globals()[feature_func_name](record[column], params)  # Call feature calculation by function name, and add to output DataFtame
+    for column in record.filter(regex="EMG_\d"):  # For each column containing EMG data (for each Series)
+        feature_label = name + '_' + column.split('_')[1]  # Prepare feature column label
+        feature_values[feature_label] = globals()[feature_func_name](record[column], **kwargs)  # Call feature calculation by function name, and add to output DataFtame
 
     return feature_values
 
@@ -36,27 +37,26 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     xml_root = ET.parse(xml_file_url).getroot()  # Load XML file with feature config
     for xml_entry in xml_root.iter('feature'):  # For each feature entry in XML file
         xml_entry.attrib = ut.convert_types_in_dict(xml_entry.attrib)  # Convert attribute dictrionary to Python literals
-        feature_frame = feature_frame.join(calculate_feature(record, xml_entry.attrib), how="outer")  # add to output frame values calculated by each feature function
+        feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib), how="outer")  # add to output frame values calculated by each feature function
 
     return feature_frame
 
 
-def feature_ZeroCross(series, params):
+def feature_ZeroCross(series, window, step, threshold):
     print("ZeroCross")
-    print(params)
     return pd.Series(np.random.randn(20))
 
 
-def feature_RMS(series, params):
-    print("RMS")
-    print(params)
-    return pd.Series(np.random.randn(10))
+def feature_RMS(series, window, step):
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sqrt(np.mean(np.square(windows_strided), axis=1)), index=series.index[indexes])
 
 
 if __name__ == '__main__':
     hdf5 = 'P:\\Data-HDF5\\emg_gestures-01-repeats_short-2018-05-08-15-06-32-389.hdf5'
     xml = 'all_features.xml'
 
-    # r_hdf5 = pd.read_hdf(hdf5)
-    # print(calculate_feature(r_hdf5, {'name': 'ZeroCross', 'window': 500, 'step': 250}))
-    print(features_from_xml(xml, hdf5))
+    r_hdf5 = pd.read_hdf(hdf5)
+    #print(calculate_feature(r_hdf5, 'ZeroCross', window=500, step=250, threshold=10))
+    print(calculate_feature(r_hdf5, name='RMS', window=500, step=250))
+    #print(features_from_xml(xml, hdf5))
