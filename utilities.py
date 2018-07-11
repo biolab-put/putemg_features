@@ -34,3 +34,18 @@ def moving_window_stride(array, window, step):
     strided = as_strided(array, shape=(win_count, window), strides=(stride*step, stride))
     index = np.arange(window - 1, window + (win_count-1) * step, step)
     return strided, index
+
+
+def window_trapezoidal(size, slope):
+    """
+    Return trapezoidal window of length size, with each slope occupying slope*100% of window
+    :param size: int - window length
+    :param slope: float - trapezoid parameter, each slope occupies slope*100% of window
+    :return: numpy.ndarray - trapezoidal window
+    """
+    if slope > 0.5:
+        slope = 0.5
+    if slope == 0:
+        return np.full(size, 1)
+    else:
+        return np.array([1 if ((slope * size <= i) & (i <= (1-slope) * size)) else (1/slope * i / size) if (i < slope * size) else (1/slope * (size - i) / size) for i in range(1, size + 1)])

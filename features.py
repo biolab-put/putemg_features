@@ -42,6 +42,12 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     return feature_frame
 
 
+def feature_IEMG(series, window, step):
+    """Integrated EMG"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(np.abs(windows_strided), axis=1), index=series.index[indexes])
+
+
 def feature_AAC(series, window, step):
     """Average Amplitude Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
@@ -55,6 +61,12 @@ def feature_DASDV(series, window, step):
     return pd.Series(data=np.sqrt(np.mean(np.square(np.diff(windows_strided)), axis=1)), index=series.index[indexes])
 
 
+def feature_LOG(series, window, step):
+    """Log Detector"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.exp(np.mean(np.log(np.abs(windows_strided)), axis=1)), index=series.index[indexes])
+
+
 def feature_MAV1(series, window, step):
     """Modified Mean Absolute Value Type 1"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
@@ -66,7 +78,8 @@ def feature_MAV2(series, window, step):
     """Modified Mean Absolute Value Type 2"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     # TODO: Phinyomark states that window weight for i > 0.75N is 4(i-N)/4, should be 4(N-i)/N, verification needed
-    win_weight = [1 if ((0.25*window <= i) & (i <= 0.75*window)) else (4*i/window) if (i < 0.25*window) else (4*(window-i)/window) for i in range(1, window+1)]
+    # win_weight = [1 if ((0.25*window <= i) & (i <= 0.75*window)) else (4*i/window) if (i < 0.25*window) else (4*(window-i)/window) for i in range(1, window+1)]
+    win_weight = ut.window_trapezoidal(window, 0.25)
     return pd.Series(data=np.mean(np.abs(windows_strided) * win_weight, axis=1), index=series.index[indexes])
 
 
@@ -87,16 +100,61 @@ def feature_MAVSLP(series, window, step):
     return pd.Series(data=np.diff(np.mean(np.abs(windows_strided), axis=1)), index=series.index[indexes[1:]])
 
 
+def feature_MHW(series, window, step):
+    """Multiple Hamming Windows"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(np.square(windows_strided * np.hamming(window)), axis=1), index=series.index[indexes])
+
+
+def feature_MTW(series, window, step, windowslope):
+    """Multiple Trapezoidal Windows"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(np.square(windows_strided) * ut.window_trapezoidal(window, windowslope), axis=1), index=series.index[indexes])
+
+
+def feature_MYOP(series, window, step, threshold):
+    """Myopulse Percentage Rate"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(windows_strided > threshold, axis=1) / window, index=series.index[indexes])
+
+
 def feature_RMS(series, window, step):
     """Root Mean Square"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sqrt(np.mean(np.square(windows_strided), axis=1)), index=series.index[indexes])
 
 
+def feature_SSI(series, window, step):
+    """Simple Square Integral"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(np.square(windows_strided), axis=1), index=series.index[indexes])
+
+
+def feature_TM(series, window, step, order):
+    """Absolute Temporal Moment"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.abs(np.mean(np.power(windows_strided, order), axis=1)), index=series.index[indexes])
+
+
 def feature_VAR(series, window, step):
     """Variance"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.var(windows_strided, axis=1), index=series.index[indexes])
+
+
+def feature_V(series, window, step, v):
+    """V-Order"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    # TODO: Phinyomark sugests order of v=3 which will result in complex result, needed verification
+    if v % 2 != 0:
+        windows_strided = np.asarray(windows_strided, dtype=complex)
+    return pd.Series(data=np.power(np.mean(np.power(windows_strided, v), axis=1), 1./v), index=series.index[indexes])
+
+
+def feature_WL(series, window, step):
+    """Waveform Length"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(np.diff(windows_strided), axis=1), index=series.index[indexes])
 
 
 def feature_ZC(series, window, step, deadzone):

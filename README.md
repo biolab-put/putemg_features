@@ -37,7 +37,26 @@ df2 = ft.calculate_feature(record[22.5:30.9], name='RMS', window=500, step=250)
 df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, step=250)
 ```
 
+# Feature List
+* Integrated EMG (IEMG)
+* Average Amplitude Change (AAC)
+* Difference Absolute Standard Deviation Value (DASDV)
+* LOG Detector (LOG)
+* Modified Mean Absolute Value Type 1 (MAV1)
+* Modified Mean Absolute Value Type 2 (MAV2)
+* Mean Absolute Value (MAV)
+* Mean Absolute Value Slope (MAVSLP)
+* Multiple Hamming Windows (MHW)
+* Multiple Trapezoidal Windows (MTW)
+* Myopulse Percentage Rate (MYOP)
+* Root Mean Square (RMS)
+* Simple Square Integral (SSI)
+* Absolute Temporal Moment (TM)
+* Variance (VAR)
+* V-Order (V)
+* Waveform Length (WL)
+* Zero Crossing (ZC)
+
 # Dependencies
 * Pandas - https://pandas.pydata.org/
-
 * Numpy - http://www.numpy.org/
