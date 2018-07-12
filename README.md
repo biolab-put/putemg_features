@@ -1,7 +1,7 @@
 # putemg-feature-extractor
 Dedicated EMG feature calculator for putEMG Dataset http://biolab.put.poznan.pl/putemg-dataset/
 
-# Usage
+## Usage
 ### Script
 putemg-feature-extractor script will calculate features of given putEMG record in HDF5 format based on feature decriptors in given XML file. See "all_features.xml" for file format and feature list along with its parameters. Output will be written to corresponding HDF5 format file with "_features" sufix.
 
@@ -32,15 +32,19 @@ import features as ft
 import pandas as pd
 
 record = pd.read_hdf('emg_gestures-03-repeats_long-2018-05-11-11-05-00-695.hdf5')
-df1 = ft.calculate_feature(record, 'ZC', window=1000, step=500, deadzone=30)
+df1 = ft.calculate_feature(record, 'ZC', window=1000, step=500, threshold=30)
 df2 = ft.calculate_feature(record[22.5:30.9], name='RMS', window=500, step=250)
 df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, step=250)
 ```
 
-# Feature List
+## Feature List
 * Integrated EMG (IEMG)
 * Average Amplitude Change (AAC)
+* Approximate Entropy (ApEn)
+* Auto-Regressive Coefficients (AR)
+* Cepstral Coefficients (CC)
 * Difference Absolute Standard Deviation Value (DASDV)
+* Kurtosis (Kurt)
 * LOG Detector (LOG)
 * Modified Mean Absolute Value Type 1 (MAV1)
 * Modified Mean Absolute Value Type 2 (MAV2)
@@ -50,13 +54,21 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Multiple Trapezoidal Windows (MTW)
 * Myopulse Percentage Rate (MYOP)
 * Root Mean Square (RMS)
+* Sample Entropy (SampEn)
+* Skewness (Skew)
+* Slope Sign Change (SSC)
 * Simple Square Integral (SSI)
 * Absolute Temporal Moment (TM)
 * Variance (VAR)
 * V-Order (V)
+* Willison Amplitude (WAMP)
 * Waveform Length (WL)
 * Zero Crossing (ZC)
 
-# Dependencies
+## Dependencies
 * Pandas - https://pandas.pydata.org/
 * Numpy - http://www.numpy.org/
+* SciPy - https://www.scipy.org/
+
+## Attributions
+* PyEEG v0.4.0 - SampEn and ApEn features - GNU GLP v3 - http://pyeeg.org

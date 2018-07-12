@@ -3,7 +3,11 @@
 <desc>
     <feature name="IEMG" window="500" step="250" /> <!--Integrated EMG-->
     <feature name="AAC" window="500" step="250" /> <!--Average Amplitude Change-->
+    <feature name="ApEn" window="1000" step="1000" m="2" r="0.2"/> <!--Approximate Entropy-->
+    <feature name="AR" window="10000" step="10000" order="4" noisestd="0.0000001" /> <!--Auto-Regressive Coefficients-->
+    <feature name="CC" window="10000" step="10000" order="4" noisestd="0.0000001" /> <!--Cepstral Coefficients-->
     <feature name="DASDV" window="500" step="250" /> <!--Difference Absolute Standard Deviation Value-->
+    <feature name="Kurt" window="500" step="250" /> <!--Kurtosis-->
     <feature name="LOG" window="500" step="250" /> <!--LOG Detector-->
     <feature name="MAV1" window="500" step="250" /> <!--Modified Mean Absolute Value Type 1-->
     <feature name="MAV2" window="500" step="250" /> <!--Modified Mean Absolute Value Type 2-->
@@ -13,11 +17,14 @@
     <feature name="MTW" window="500" step="250" windowslope="0.25"/> <!--Multiple Trapezoidal Windows-->
     <feature name="MYOP" window="1000" step="500" threshold="100"/> <!--Myopulse Percentage Rate-->
     <feature name="RMS" window="500" step="250" /> <!--Root Mean Square-->
+    <feature name="SampleEn" window="1000" step="1000" m="2" r="0.2"/> <!--Sample Entropy-->
+    <feature name="Skew" window="2000" step="100"/> <!--Skewness-->
+    <feature name="SSC" window="500" step="250" threshold="50"/> <!--Slope Sign Change-->
     <feature name="SSI" window="500" step="250" /> <!--Simple Square Integral-->
     <feature name="TM" window="500" step="250" order="4" /> <!--Absolute Temporal Moment-->
     <feature name="VAR" window="500" step="250" /> <!--Variance-->
     <feature name="V" window="500" step="250" order="3"/> <!--V-Order-->
+    <feature name="WAMP" window="500" step="250" threshold="10"/> <!--Willison Amplitude-->
     <feature name="WL" window="500" step="250" /> <!--Waveform Length-->
-    <feature name="ZC" window="1000" step="500" deadzone="30" /> <!--Zero Crossing-->
-
+    <feature name="ZC" window="1000" step="500" threshold="30" /> <!--Zero Crossing-->
 </desc>

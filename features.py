@@ -1,7 +1,11 @@
 import pandas as pd
 import numpy as np
 import utilities as ut
+import math
+import pyeeg
 import xml.etree.ElementTree as ET
+from scipy import optimize, stats
+from numpy.lib.stride_tricks import as_strided
 
 
 def calculate_feature(record, name, **kwargs):
@@ -55,10 +59,59 @@ def feature_AAC(series, window, step):
     return pd.Series(data=np.divide(np.sum(np.abs(np.diff(windows_strided)), axis=1), window), index=series.index[indexes])
 
 
+def feature_ApEn(series, window, step, m, r):
+    """Approximate Entropy
+    AnEn feature is using PyEEG library v0.4.0 as it is, licensed with GNU GPL v3
+    http://pyeeg.org"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.ap_entropy(win, m, r), axis=1, arr=windows_strided), index=series.index[indexes])
+
+
+def feature_AR(series, window, step, order, noisestd):
+    """Auto-Regressive Coefficients"""
+    # TODO: Verification needed, ARMA model coef calculated by fminsearch, min function not 100% sure, coefs output is Series of ndarrays, ok?
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+
+    def AR_min_func(a, data, win):
+        noise = np.random.normal(0, noisestd, size=stride_count)
+        return np.sum(np.abs(windows_strided[win][order::order] - (np.sum(data * a, axis=1) + noise)))
+
+    win_coefs = pd.Series()
+
+    for widx in range(len(windows_strided)):
+        stride = windows_strided[widx].strides[0]
+        stride_count = math.floor((len(windows_strided[widx]) - 1) / order)
+        win_strided = as_strided(windows_strided[widx], shape=[stride_count, order], strides=(stride * order, stride))
+
+        a = optimize.fmin(func=AR_min_func, x0=np.full(order, 1), args=(win_strided, widx), disp=0)
+        win_coefs.at[series.index[indexes[widx]]] = a
+
+    return win_coefs
+
+
+def feature_CC(series, window, step, order, noisestd):
+    """Cepstral Coefficients"""
+    # TODO: CC is derived from ARMA model coefficirnts, this approach requires minimizing AR model twice if both features are requested
+    win_coefs = feature_AR(series, window, step, order, noisestd)
+    for coefs in win_coefs:
+        coefs[0] = -coefs[0]
+        for p in range(1, order):
+            coefs[p] = -coefs[p] - np.sum(
+                [1 - (l / (p + 1)) for l in range(1, p + 1)] * np.full(p, coefs[p] * coefs[p - 1]))
+
+    return win_coefs
+
+
 def feature_DASDV(series, window, step):
     """Difference Absolute Standard Deviation Value"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sqrt(np.mean(np.square(np.diff(windows_strided)), axis=1)), index=series.index[indexes])
+
+
+def feature_Kurt(series, window, step):
+    """Kurtosis"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=stats.kurtosis(windows_strided, axis=1), index=series.index[indexes])
 
 
 def feature_LOG(series, window, step):
@@ -124,6 +177,27 @@ def feature_RMS(series, window, step):
     return pd.Series(data=np.sqrt(np.mean(np.square(windows_strided), axis=1)), index=series.index[indexes])
 
 
+def feature_SampEn(series, window, step, m, r):
+    """Sample Entropy
+    SampEn feature is using PyEEG library v 0.02_r2 as it is, licensed with GNU GPL v3
+    http://pyeeg.sourceforge.net/"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.samp_entropy(win, m, r), axis=1, arr=windows_strided), index=series.index[indexes])
+
+
+def feature_Skew(series, window, step):
+    """Skewness"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=stats.skew(windows_strided, axis=1), index=series.index[indexes])
+
+
+def feature_SSC(series, window, step, threshold):
+    """Slope Sign Change"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    # TODO: reimplemented definition, needs verification
+    return pd.Series(data=np.apply_along_axis(lambda x: np.sum(np.diff(np.diff(x[(x < -threshold) | (x > threshold)]) > 0)), axis=1, arr=windows_strided), index=series.index[indexes])
+
+
 def feature_SSI(series, window, step):
     """Simple Square Integral"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
@@ -151,14 +225,20 @@ def feature_V(series, window, step, v):
     return pd.Series(data=np.power(np.mean(np.power(windows_strided, v), axis=1), 1./v), index=series.index[indexes])
 
 
+def feature_WAMP(series, window, step, threshold):
+    """Willison Amplitude"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.sum(np.diff(windows_strided) >= threshold, axis=1), index=series.index[indexes])
+
+
 def feature_WL(series, window, step):
     """Waveform Length"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.diff(windows_strided), axis=1), index=series.index[indexes])
 
 
-def feature_ZC(series, window, step, deadzone):
+def feature_ZC(series, window, step, threshold):
     """Zero Crossing"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -deadzone) | (x > deadzone)] > 0)), axis=1, arr=windows_strided)
+    zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -threshold) | (x > threshold)] > 0)), axis=1, arr=windows_strided)
     return pd.Series(data=zc, index=series.index[indexes])
