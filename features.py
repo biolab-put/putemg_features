@@ -10,8 +10,8 @@ from numpy.lib.stride_tricks import as_strided
 
 def calculate_feature(record, name, **kwargs):
     """
-    Calculates feature given by params['name'] of given pandas.DataFrame. Feature is calculated for each Series with
-    column name of "EMG_\d". Feature parameters are passed by Dict params, eg. {'name': RMS, 'window': 500, 'step': 250}
+    Calculates feature given name of given pandas.DataFrame. Feature is calculated for each Series with
+    column name of "EMG_\d". Feature parameters are passed by **kwargs, eg. window=500, step=250
     :param record: pandas.DataFrame - input DataFrame with data to calculate features from
     :param name: string - name of the requested feature
     :param kwargs: parameters for feature calculation.
@@ -268,6 +268,7 @@ def feature_MDF(series, window, step):
 
 def feature_PKF(series, window, step):
     """Peak Frequency"""
+    # TODO: Signal filtration neede, 50/60 Hz always, same with PSR
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     power, freq = ut.power_spectrum(windows_strided, window)
     return pd.Series(data=freq[np.argmax(power, axis=1)], index=series.index[indexes])
@@ -291,7 +292,7 @@ def feature_SM(series, window, step, order):
     """Spectral Moment"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     power, freq = ut.power_spectrum(windows_strided, window)
-    return pd.Series(data=np.sum(np.power(power, order), axis=1), index=series.index[indexes])
+    return pd.Series(data=np.sum(power * np.power(freq, order), axis=1), index=series.index[indexes])
 
 
 def feature_FR(series, window, step, flb, fhb):
@@ -301,3 +302,25 @@ def feature_FR(series, window, step, flb, fhb):
     lb = np.sum(power[:, (flb[0] < freq) & (freq < flb[1])], axis=1)
     hb = np.sum(power[:, (fhb[0] < freq) & (freq < fhb[1])], axis=1)
     return pd.Series(data=(lb / hb), index=series.index[indexes])
+
+
+def feature_VCF(series, window, step):
+    """Variance of Central Frequency"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+
+    def SM(order):
+        return np.sum(power * np.power(freq, order), axis=1)
+
+    return pd.Series(data=SM(2)/SM(0) - np.square(SM(1)/SM(0)), index=series.index[indexes])
+
+
+def feature_PSR(series, window, step, n):
+    """Power Spectrum Ratio"""
+    # TODO: Definition not clear with description, verification needed
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    PKF_id = np.argmax(power, axis=1)
+    lb = np.where(PKF_id - 20 < 0, 0, PKF_id - 20)
+    hb = np.where(PKF_id + 20 > window, window, PKF_id + 20)
+    return pd.Series(data=[sum(p[l:h]) for p, l, h in zip(power, lb, hb)] / np.sum(power, axis=1), index=series.index[indexes])

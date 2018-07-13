@@ -70,6 +70,8 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Mean Power (MNP)
 * Total Power (TTP)
 * Frequency Ratio (FR)
+* Variance of Central Frequency (VCF)
+* Power Spectrum Ratio (PSR)
 
 ## Dependencies
 * Pandas - https://pandas.pydata.org/

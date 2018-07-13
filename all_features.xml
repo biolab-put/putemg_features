@@ -33,4 +33,6 @@
     <feature name="MNP" window="5000" step="5000" /> <!--Mean Power-->
     <feature name="TTP" window="5000" step="5000" /> <!--Total Power-->
     <feature name="FR" window="5000" step="5000" flb="[15, 45]" fhb="[90, 500]" /> <!--Frequency Ratio-->
+    <feature name="VCF" window="5000" step="5000" /> <!--Variance of Central Frequency-->
+    <feature name="PSR" window="5000" step="5000" n="20"/> <!--Power Spectrum Ratio-->
 </desc>
