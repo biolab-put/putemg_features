@@ -27,4 +27,10 @@
     <feature name="WAMP" window="500" step="250" threshold="10"/> <!--Willison Amplitude-->
     <feature name="WL" window="500" step="250" /> <!--Waveform Length-->
     <feature name="ZC" window="1000" step="500" threshold="30" /> <!--Zero Crossing-->
+    <feature name="MNF" window="5000" step="5000" /> <!--Mean Frequency-->
+    <feature name="MDF" window="5000" step="5000" /> <!--Median Frequency-->
+    <feature name="PKF" window="5000" step="5000" /> <!--Peak Frequency-->
+    <feature name="MNP" window="5000" step="5000" /> <!--Mean Power-->
+    <feature name="TTP" window="5000" step="5000" /> <!--Total Power-->
+    <feature name="FR" window="5000" step="5000" flb="[15, 45]" fhb="[90, 500]" /> <!--Frequency Ratio-->
 </desc>

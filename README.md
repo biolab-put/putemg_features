@@ -64,6 +64,12 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Willison Amplitude (WAMP)
 * Waveform Length (WL)
 * Zero Crossing (ZC)
+* Mean Frequency (MNF)
+* Median Frequency (MDF)
+* Peak Frequency (PKF)
+* Mean Power (MNP)
+* Total Power (TTP)
+* Frequency Ratio (FR)
 
 ## Dependencies
 * Pandas - https://pandas.pydata.org/

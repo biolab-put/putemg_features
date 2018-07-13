@@ -242,3 +242,62 @@ def feature_ZC(series, window, step, threshold):
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -threshold) | (x > threshold)] > 0)), axis=1, arr=windows_strided)
     return pd.Series(data=zc, index=series.index[indexes])
+
+
+def feature_MNF(series, window, step):
+    """Mean Frequency"""
+    # TODO: In case of FD features FFT is calculated many times with XML approach, change approach?
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    return pd.Series(data=np.sum(power*freq, axis=1) / np.sum(power, axis=1), index=series.index[indexes])
+
+
+def feature_MDF(series, window, step):
+    """Median Frequency"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    TTPhalf = np.sum(power, axis=1)/2
+    MDF = np.zeros(len(windows_strided))
+    for w in range(len(power)):
+        for s in range(1, len(power) + 1):
+            if np.sum(power[w, :s]) > TTPhalf[w]:
+                MDF[w] = freq[s - 1]
+                break
+    return pd.Series(data=MDF, index=series.index[indexes])
+
+
+def feature_PKF(series, window, step):
+    """Peak Frequency"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    return pd.Series(data=freq[np.argmax(power, axis=1)], index=series.index[indexes])
+
+
+def feature_MNP(series, window, step):
+    """Mean Power"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    return pd.Series(data=np.mean(power, axis=1), index=series.index[indexes])
+
+
+def feature_TTP(series, window, step):
+    """Total Power"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    return pd.Series(data=np.sum(power, axis=1), index=series.index[indexes])
+
+
+def feature_SM(series, window, step, order):
+    """Spectral Moment"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    return pd.Series(data=np.sum(np.power(power, order), axis=1), index=series.index[indexes])
+
+
+def feature_FR(series, window, step, flb, fhb):
+    """Frequency Ratio"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    lb = np.sum(power[:, (flb[0] < freq) & (freq < flb[1])], axis=1)
+    hb = np.sum(power[:, (fhb[0] < freq) & (freq < fhb[1])], axis=1)
+    return pd.Series(data=(lb / hb), index=series.index[indexes])
