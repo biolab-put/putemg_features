@@ -4,8 +4,8 @@
     <feature name="IEMG" window="500" step="250" /> <!--Integrated EMG-->
     <feature name="AAC" window="500" step="250" /> <!--Average Amplitude Change-->
     <feature name="ApEn" window="1000" step="1000" m="2" r="0.2"/> <!--Approximate Entropy-->
-    <feature name="AR" window="10000" step="10000" order="4" noisestd="0.0000001" /> <!--Auto-Regressive Coefficients-->
-    <feature name="CC" window="10000" step="10000" order="4" noisestd="0.0000001" /> <!--Cepstral Coefficients-->
+    <feature name="AR" window="10000" step="10000" order="4" /> <!--Auto-Regressive Coefficients-->
+    <feature name="CC" window="10000" step="10000" order="4" /> <!--Cepstral Coefficients-->
     <feature name="DASDV" window="500" step="250" /> <!--Difference Absolute Standard Deviation Value-->
     <feature name="Kurt" window="500" step="250" /> <!--Kurtosis-->
     <feature name="LOG" window="500" step="250" /> <!--LOG Detector-->
@@ -19,7 +19,7 @@
     <feature name="RMS" window="500" step="250" /> <!--Root Mean Square-->
     <feature name="SampleEn" window="1000" step="1000" m="2" r="0.2"/> <!--Sample Entropy-->
     <feature name="Skew" window="2000" step="100"/> <!--Skewness-->
-    <feature name="SSC" window="500" step="250" threshold="50"/> <!--Slope Sign Change-->
+    <feature name="SSC" window="500" step="250" threshold="16"/> <!--Slope Sign Change-->
     <feature name="SSI" window="500" step="250" /> <!--Simple Square Integral-->
     <feature name="TM" window="500" step="250" order="4" /> <!--Absolute Temporal Moment-->
     <feature name="VAR" window="500" step="250" /> <!--Variance-->

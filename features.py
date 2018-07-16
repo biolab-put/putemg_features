@@ -55,7 +55,6 @@ def feature_IEMG(series, window, step):
 def feature_AAC(series, window, step):
     """Average Amplitude Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    # TODO: Check if really should by divided by N, not N-1 (standard mean), verification needed
     return pd.Series(data=np.divide(np.sum(np.abs(np.diff(windows_strided)), axis=1), window), index=series.index[indexes])
 
 
@@ -67,32 +66,26 @@ def feature_ApEn(series, window, step, m, r):
     return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.ap_entropy(win, m, r), axis=1, arr=windows_strided), index=series.index[indexes])
 
 
-def feature_AR(series, window, step, order, noisestd):
+def feature_AR(series, window, step, order):
     """Auto-Regressive Coefficients"""
-    # TODO: Verification needed, ARMA model coef calculated by fminsearch, min function not 100% sure, coefs output is Series of ndarrays, ok?
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
 
-    def AR_min_func(a, data, win):
-        noise = np.random.normal(0, noisestd, size=stride_count)
-        return np.sum(np.abs(windows_strided[win][order::order] - (np.sum(data * a, axis=1) + noise)))
-
     win_coefs = pd.Series()
-
     for widx in range(len(windows_strided)):
         stride = windows_strided[widx].strides[0]
-        stride_count = math.floor((len(windows_strided[widx]) - 1) / order)
-        win_strided = as_strided(windows_strided[widx], shape=[stride_count, order], strides=(stride * order, stride))
+        stride_count = len(windows_strided[widx]) - order
+        x = as_strided(windows_strided[widx], shape=[stride_count, order], strides=(stride, stride))
+        y = windows_strided[widx][order:]
 
-        a = optimize.fmin(func=AR_min_func, x0=np.full(order, 1), args=(win_strided, widx), disp=0)
+        a, _, _, _ = np.linalg.lstsq(x,y, rcond=None)
         win_coefs.at[series.index[indexes[widx]]] = a
 
     return win_coefs
 
 
-def feature_CC(series, window, step, order, noisestd):
+def feature_CC(series, window, step, order):
     """Cepstral Coefficients"""
-    # TODO: CC is derived from ARMA model coefficirnts, this approach requires minimizing AR model twice if both features are requested
-    win_coefs = feature_AR(series, window, step, order, noisestd)
+    win_coefs = feature_AR(series, window, step, order)
     for coefs in win_coefs:
         coefs[0] = -coefs[0]
         for p in range(1, order):
@@ -130,8 +123,6 @@ def feature_MAV1(series, window, step):
 def feature_MAV2(series, window, step):
     """Modified Mean Absolute Value Type 2"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    # TODO: Phinyomark states that window weight for i > 0.75N is 4(i-N)/4, should be 4(N-i)/N, verification needed
-    # win_weight = [1 if ((0.25*window <= i) & (i <= 0.75*window)) else (4*i/window) if (i < 0.25*window) else (4*(window-i)/window) for i in range(1, window+1)]
     win_weight = ut.window_trapezoidal(window, 0.25)
     return pd.Series(data=np.mean(np.abs(windows_strided) * win_weight, axis=1), index=series.index[indexes])
 
@@ -144,12 +135,7 @@ def feature_MAV(series, window, step):
 
 def feature_MAVSLP(series, window, step):
     """Mean Absolute Value Slope"""
-    # TODO: Mean Absolute Value Slope is considered as feature as set of k-segment diffs of adjectent MAV, here not the set/list but each diff is calculated, verification needed
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    # It can be also defined as below, however it not practical:
-    # slp = np.diff(np.mean(np.abs(windows_strided), axis=1))
-    # stride = slp.strides[0]
-    # return pd.Series(data=as_strided(slp, shape=(len(slp) - segments + 1, segments), strides=(stride, stride)).tolist(), index=series.index[indexes[segments:]])
     return pd.Series(data=np.diff(np.mean(np.abs(windows_strided), axis=1)), index=series.index[indexes[1:]])
 
 
@@ -194,8 +180,7 @@ def feature_Skew(series, window, step):
 def feature_SSC(series, window, step, threshold):
     """Slope Sign Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    # TODO: reimplemented definition, needs verification
-    return pd.Series(data=np.apply_along_axis(lambda x: np.sum(np.diff(np.diff(x[(x < -threshold) | (x > threshold)]) > 0)), axis=1, arr=windows_strided), index=series.index[indexes])
+    return pd.Series(data=np.apply_along_axis(lambda x: np.sum((np.diff(x[:-1]) * np.diff(x[1:])) <= -threshold), axis=1, arr=windows_strided), index=series.index[indexes])
 
 
 def feature_SSI(series, window, step):
@@ -219,10 +204,7 @@ def feature_VAR(series, window, step):
 def feature_V(series, window, step, v):
     """V-Order"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    # TODO: Phinyomark sugests order of v=3 which will result in complex result, needed verification
-    if v % 2 != 0:
-        windows_strided = np.asarray(windows_strided, dtype=complex)
-    return pd.Series(data=np.power(np.mean(np.power(windows_strided, v), axis=1), 1./v), index=series.index[indexes])
+    return pd.Series(data=np.power(np.abs(np.mean(np.power(windows_strided, v), axis=1)), 1./v), index=series.index[indexes])
 
 
 def feature_WAMP(series, window, step, threshold):
@@ -317,7 +299,6 @@ def feature_VCF(series, window, step):
 
 def feature_PSR(series, window, step, n):
     """Power Spectrum Ratio"""
-    # TODO: Definition not clear with description, verification needed
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     power, freq = ut.power_spectrum(windows_strided, window)
     PKF_id = np.argmax(power, axis=1)
