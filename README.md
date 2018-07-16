@@ -38,7 +38,7 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 ```
 
 ## Feature List
-* Integrated EMG (IEMG)
+* Integral Absolute Value (IAV)
 * Average Amplitude Change (AAC)
 * Approximate Entropy (ApEn)
 * Auto-Regressive Coefficients (AR)
@@ -72,6 +72,9 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Frequency Ratio (FR)
 * Variance of Central Frequency (VCF)
 * Power Spectrum Ratio (PSR)
+* Signal-to-Noise Ratio (SNR)
+* Maximum-to-minimum Drop in Power Density Ratio (DPR)
+* Power Spectrum Deformation (OHM)
 
 ## Dependencies
 * Pandas - https://pandas.pydata.org/

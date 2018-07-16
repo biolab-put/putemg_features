@@ -2,6 +2,7 @@ import ast
 import math
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
+from scipy import signal
 
 
 def convert_types_in_dict(xml_dict):
@@ -61,4 +62,6 @@ def power_spectrum(windows_strided, winsize):
     T = 1.0 / 5120
     power = 2.0 / winsize * np.absolute(np.fft.fft(windows_strided)[:, :winsize//2])
     freq = np.fft.fftfreq(winsize, d=T)[:winsize//2]
+    #power[:, ((freq <= 10) | (freq >= 500))] = 0
+    #return signal.medfilt(power, 3), freq
     return power, freq

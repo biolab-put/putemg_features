@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <desc>
-    <feature name="IEMG" window="500" step="250" /> <!--Integrated EMG-->
+    <feature name="IAV" window="500" step="250" /> <!--Integral Absolute Value-->
     <feature name="AAC" window="500" step="250" /> <!--Average Amplitude Change-->
     <feature name="ApEn" window="1000" step="1000" m="2" r="0.2"/> <!--Approximate Entropy-->
     <feature name="AR" window="10000" step="10000" order="4" /> <!--Auto-Regressive Coefficients-->
@@ -34,5 +34,8 @@
     <feature name="TTP" window="5000" step="5000" /> <!--Total Power-->
     <feature name="FR" window="5000" step="5000" flb="[15, 45]" fhb="[90, 500]" /> <!--Frequency Ratio-->
     <feature name="VCF" window="5000" step="5000" /> <!--Variance of Central Frequency-->
-    <feature name="PSR" window="5000" step="5000" n="20"/> <!--Power Spectrum Ratio-->
+    <feature name="PSR" window="5000" step="5000" n="20" /> <!--Power Spectrum Ratio-->
+    <feature name="SNR" window="1000" step="1000" powerband="[10, 1000]" noiseband="[500, 1000]" /> <!--Signal-to-Noise Ratio-->
+    <feature name="DPR" window="1000" step="1000" band="[35, 600]" n="13" /> <!--Maximum-to-minimum Drop in Power Density Ratio-->
+    <feature name="OHM" window="1000" step="1000" /> <!--Power Spectrum Deformation-->
 </desc>

@@ -46,8 +46,8 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     return feature_frame
 
 
-def feature_IEMG(series, window, step):
-    """Integrated EMG"""
+def feature_IAV(series, window, step):
+    """Integral Absolute Value"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.abs(windows_strided), axis=1), index=series.index[indexes])
 
@@ -228,7 +228,6 @@ def feature_ZC(series, window, step, threshold):
 
 def feature_MNF(series, window, step):
     """Mean Frequency"""
-    # TODO: In case of FD features FFT is calculated many times with XML approach, change approach?
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     power, freq = ut.power_spectrum(windows_strided, window)
     return pd.Series(data=np.sum(power*freq, axis=1) / np.sum(power, axis=1), index=series.index[indexes])
@@ -250,7 +249,6 @@ def feature_MDF(series, window, step):
 
 def feature_PKF(series, window, step):
     """Peak Frequency"""
-    # TODO: Signal filtration neede, 50/60 Hz always, same with PSR
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     power, freq = ut.power_spectrum(windows_strided, window)
     return pd.Series(data=freq[np.argmax(power, axis=1)], index=series.index[indexes])
@@ -305,3 +303,39 @@ def feature_PSR(series, window, step, n):
     lb = np.where(PKF_id - 20 < 0, 0, PKF_id - 20)
     hb = np.where(PKF_id + 20 > window, window, PKF_id + 20)
     return pd.Series(data=[sum(p[l:h]) for p, l, h in zip(power, lb, hb)] / np.sum(power, axis=1), index=series.index[indexes])
+
+
+def feature_SNR(series, window, step, powerband, noiseband):
+    """Signal-to-Noise Ratio"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+    snr = np.apply_along_axis(lambda p: np.sum(p[(freq > powerband[0]) & (freq < powerband[1])]) / (np.sum(p[(freq > noiseband[0]) & (freq < noiseband[1])]) * np.max(freq)), axis=1, arr=power)
+    return pd.Series(data=snr, index=series.index[indexes])
+
+
+def feature_DPR(series, window, step, band, n):
+    """Maximum-to-minimum Drop in Power Density Ratio"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+
+    dpr = pd.Series()
+    for pidx in range(len(power)):
+        power_b = power[pidx][(freq > band[0]) & (freq < band[1])]
+        stride = power_b.strides[0]
+        stride_count = len(power_b) - n + 1
+        p_strided = as_strided(power_b, shape=[stride_count, n], strides=(stride, stride))
+        means = np.mean(p_strided, axis=1)
+        dpr.at[series.index[indexes[pidx]]] = np.max(means) / np.min(means)
+
+    return pd.Series(data=dpr, index=series.index[indexes])
+
+
+def feature_OHM(series, window, step):
+    """Power Spectrum Deformation"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+
+    def SM(order):
+        return np.sum(power * np.power(freq, order), axis=1)
+
+    return pd.Series(data=np.sqrt(SM(2)/SM(0)) / (SM(1)/SM(0)), index=series.index[indexes])
