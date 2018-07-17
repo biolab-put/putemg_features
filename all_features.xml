@@ -38,4 +38,6 @@
     <feature name="SNR" window="1000" step="1000" powerband="[10, 1000]" noiseband="[500, 1000]" /> <!--Signal-to-Noise Ratio-->
     <feature name="DPR" window="1000" step="1000" band="[35, 600]" n="13" /> <!--Maximum-to-minimum Drop in Power Density Ratio-->
     <feature name="OHM" window="1000" step="1000" /> <!--Power Spectrum Deformation-->
+    <feature name="MAX" window="1000" step="1000" order="6" cutoff="5" /> <!--Maximum Amplitude-->
+    <feature name="SMR" window="5000" step="5000" n="13" /> <!--Signal-to-Motion Artifact Ratio-->
 </desc>

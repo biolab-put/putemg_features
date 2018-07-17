@@ -75,6 +75,8 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Signal-to-Noise Ratio (SNR)
 * Maximum-to-minimum Drop in Power Density Ratio (DPR)
 * Power Spectrum Deformation (OHM)
+* Maximum Amplitude (MAX)
+* Signal-to-Motion Artifact Ratio (SMR)
 
 ## Dependencies
 * Pandas - https://pandas.pydata.org/

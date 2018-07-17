@@ -1,10 +1,9 @@
 import pandas as pd
 import numpy as np
 import utilities as ut
-import math
 import pyeeg
 import xml.etree.ElementTree as ET
-from scipy import optimize, stats
+from scipy import stats, signal
 from numpy.lib.stride_tricks import as_strided
 
 
@@ -339,3 +338,36 @@ def feature_OHM(series, window, step):
         return np.sum(power * np.power(freq, order), axis=1)
 
     return pd.Series(data=np.sqrt(SM(2)/SM(0)) / (SM(1)/SM(0)), index=series.index[indexes])
+
+
+def feature_MAX(series, window, step, order, cutoff):
+    """Maximum Amplitude"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    fs = 5120
+    b, a = signal.butter(order, cutoff / (0.5 * fs), btype='lowpass', analog=False, output='ba')
+    return pd.Series(data=np.max(signal.lfilter(b, a, np.abs(windows_strided), axis=1), axis=1), index=series.index[indexes])
+
+
+def feature_SMR(series, window, step, n):
+    """Signal-to-Motion Artifact Ratio"""
+    # TODO: Verification Needed
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+    power, freq = ut.power_spectrum(windows_strided, window)
+
+    freq_over35 = freq > 35
+    freq_over35_idx = np.argmax(freq_over35)
+
+    smr = pd.Series()
+    for pidx in range(len(power)):
+        power_b = power[pidx][freq_over35]
+        stride = power_b.strides[0]
+        stride_count = len(power_b) - n + 1
+        p_strided = as_strided(power_b, shape=[stride_count, n], strides=(stride, stride))
+        mean = np.mean(p_strided, axis=1)
+        max = np.max(mean)
+        max_idx = np.argmax(mean) + int(np.floor(n / 2.0)) + freq_over35_idx
+        a = max / freq[max_idx]
+
+        smr.at[series.index[indexes[pidx]]] = np.sum(power[pidx][freq < 600]) / np.sum(power[pidx][power[pidx] > (freq*a)])
+
+    return pd.Series(data=smr, index=series.index[indexes])
