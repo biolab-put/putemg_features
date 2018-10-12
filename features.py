@@ -3,7 +3,7 @@ import numpy as np
 import utilities as ut
 import pyeeg
 import xml.etree.ElementTree as ET
-from scipy import stats, signal
+from scipy import stats, signal, interpolate
 from numpy.lib.stride_tricks import as_strided
 
 
@@ -371,3 +371,40 @@ def feature_SMR(series, window, step, n):
         smr.at[series.index[indexes[pidx]]] = np.sum(power[pidx][freq < 600]) / np.sum(power[pidx][power[pidx] > (freq*a)])
 
     return pd.Series(data=smr, index=series.index[indexes])
+
+
+def feature_BC(series, window, step, y_box_size_multiplier, subsampling):
+    """Box-Counting Dimension"""
+    windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
+
+    # Box-Counting Example: https://gist.github.com/rougier/e5eafc276a4e54f516ed5559df4242c0#file-fractal-dimension-py-L25
+    n = 2 ** np.floor(np.log(window) / np.log(2))
+    n = int(np.log(n) / np.log(2))
+    sizes = 2 ** np.arange(n, 1, -1)
+
+    def box_counting_dimension(sig):
+        box_count = []
+        for box_size in sizes:
+            x_box_size = box_size
+            y_box_size = box_size * y_box_size_multiplier
+
+            sig_minimum = np.min(sig)
+
+            box_occupation = np.zeros(
+                [int(len(sig) / x_box_size) + 1, int((np.max(sig) - sig_minimum) / y_box_size) + 1])
+
+            interp_func = interpolate.interp1d(np.arange(0, len(sig), 1), sig.reshape(1, len(sig))[0])
+            x_interp = np.arange(0, len(sig) - 1 + 1 / subsampling, 1 / subsampling)
+            sig_interp = interp_func(x_interp)
+
+            for i in range(len(sig_interp)):
+                x_box_id = int(x_interp[i] / x_box_size)
+                y_box_id = int((sig_interp[i] - sig_minimum) / y_box_size)
+                box_occupation[x_box_id, y_box_id] = 1
+
+            box_count.append(np.sum(box_occupation))
+
+        coefs = np.polyfit(np.log(1 / sizes), np.log(box_count), 1)
+        return coefs[0]
+
+    return pd.Series(data=np.apply_along_axis(lambda win: box_counting_dimension(win), axis=1, arr=windows_strided), index=series.index[indexes])
