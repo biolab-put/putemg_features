@@ -2,7 +2,7 @@ import ast
 import math
 import numpy as np
 from numpy.lib.stride_tricks import as_strided
-from scipy import signal
+from scipy import interpolate
 
 
 def convert_types_in_dict(xml_dict):
@@ -65,3 +65,34 @@ def power_spectrum(windows_strided, winsize):
     #power[:, ((freq <= 10) | (freq >= 500))] = 0
     #return signal.medfilt(power, 3), freq
     return power, freq
+
+
+def box_counting_dimension(sig, y_box_size_multiplier, subsampling):
+    # Box-Counting Example: https://gist.github.com/rougier/e5eafc276a4e54f516ed5559df4242c0#file-fractal-dimension-py-L25
+    n = 2 ** np.floor(np.log(len(sig)) / np.log(2))
+    n = int(np.log(n) / np.log(2))
+    sizes = 2 ** np.arange(n, 1, -1)
+
+    box_count = []
+    for box_size in sizes:
+        x_box_size = box_size
+        y_box_size = box_size * y_box_size_multiplier
+
+        sig_minimum = np.min(sig)
+
+        box_occupation = np.zeros(
+            [int(len(sig) / x_box_size) + 1, int((np.max(sig) - sig_minimum) / y_box_size) + 1])
+
+        interp_func = interpolate.interp1d(np.arange(0, len(sig), 1), sig.reshape(1, len(sig))[0])
+        x_interp = np.arange(0, len(sig) - 1 + 1 / subsampling, 1 / subsampling)
+        sig_interp = interp_func(x_interp)
+
+        for i in range(len(sig_interp)):
+            x_box_id = int(x_interp[i] / x_box_size)
+            y_box_id = int((sig_interp[i] - sig_minimum) / y_box_size)
+            box_occupation[x_box_id, y_box_id] = 1
+
+        box_count.append(np.sum(box_occupation))
+
+    coefs = np.polyfit(np.log(1 / sizes), np.log(box_count), 1)
+    return coefs[0]

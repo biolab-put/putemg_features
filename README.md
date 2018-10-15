@@ -78,6 +78,7 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Maximum Amplitude (MAX)
 * Signal-to-Motion Artifact Ratio (SMR)
 * Box-Counting Dimension (BC)
+* Power Spectral Density Fractal Dimension (PSDFD)
 
 ## Dependencies
 * Pandas - https://pandas.pydata.org/
