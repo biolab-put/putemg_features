@@ -228,14 +228,14 @@ def feature_ZC(series, window, step, threshold):
 def feature_MNF(series, window, step):
     """Mean Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.sum(power*freq, axis=1) / np.sum(power, axis=1), index=series.index[indexes])
 
 
 def feature_MDF(series, window, step):
     """Median Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     TTPhalf = np.sum(power, axis=1)/2
     MDF = np.zeros(len(windows_strided))
     for w in range(len(power)):
@@ -249,35 +249,35 @@ def feature_MDF(series, window, step):
 def feature_PKF(series, window, step):
     """Peak Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=freq[np.argmax(power, axis=1)], index=series.index[indexes])
 
 
 def feature_MNP(series, window, step):
     """Mean Power"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.mean(power, axis=1), index=series.index[indexes])
 
 
 def feature_TTP(series, window, step):
     """Total Power"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.sum(power, axis=1), index=series.index[indexes])
 
 
 def feature_SM(series, window, step, order):
     """Spectral Moment"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.sum(power * np.power(freq, order), axis=1), index=series.index[indexes])
 
 
 def feature_FR(series, window, step, flb, fhb):
     """Frequency Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     lb = np.sum(power[:, (flb[0] < freq) & (freq < flb[1])], axis=1)
     hb = np.sum(power[:, (fhb[0] < freq) & (freq < fhb[1])], axis=1)
     return pd.Series(data=(lb / hb), index=series.index[indexes])
@@ -286,7 +286,7 @@ def feature_FR(series, window, step, flb, fhb):
 def feature_VCF(series, window, step):
     """Variance of Central Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
 
     def SM(order):
         return np.sum(power * np.power(freq, order), axis=1)
@@ -297,7 +297,7 @@ def feature_VCF(series, window, step):
 def feature_PSR(series, window, step, n):
     """Power Spectrum Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     PKF_id = np.argmax(power, axis=1)
     lb = np.where(PKF_id - 20 < 0, 0, PKF_id - 20)
     hb = np.where(PKF_id + 20 > window, window, PKF_id + 20)
@@ -307,7 +307,7 @@ def feature_PSR(series, window, step, n):
 def feature_SNR(series, window, step, powerband, noiseband):
     """Signal-to-Noise Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     snr = np.apply_along_axis(lambda p: np.sum(p[(freq > powerband[0]) & (freq < powerband[1])]) / (np.sum(p[(freq > noiseband[0]) & (freq < noiseband[1])]) * np.max(freq)), axis=1, arr=power)
     return pd.Series(data=snr, index=series.index[indexes])
 
@@ -315,7 +315,7 @@ def feature_SNR(series, window, step, powerband, noiseband):
 def feature_DPR(series, window, step, band, n):
     """Maximum-to-minimum Drop in Power Density Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
 
     dpr = pd.Series()
     for pidx in range(len(power)):
@@ -332,7 +332,7 @@ def feature_DPR(series, window, step, band, n):
 def feature_OHM(series, window, step):
     """Power Spectrum Deformation"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
 
     def SM(order):
         return np.sum(power * np.power(freq, order), axis=1)
@@ -352,7 +352,7 @@ def feature_SMR(series, window, step, n):
     """Signal-to-Motion Artifact Ratio"""
     # TODO: Verification Needed
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
 
     freq_over35 = freq > 35
     freq_over35_idx = np.argmax(freq_over35)
@@ -382,5 +382,5 @@ def feature_BC(series, window, step, y_box_size_multiplier, subsampling):
 def feature_PSDFD(series, window, step, power_box_size_multiplier, subsampling):
     """Power Spectral Density Fractal Dimension"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    power, freq = ut.power_spectrum(windows_strided, window)
+    freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.apply_along_axis(lambda sig: ut.box_counting_dimension(sig, power_box_size_multiplier, subsampling), axis=1, arr=power), index=series.index[indexes])

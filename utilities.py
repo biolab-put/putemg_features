@@ -52,21 +52,6 @@ def window_trapezoidal(size, slope):
         return np.array([1 if ((slope * size <= i) & (i <= (1-slope) * size)) else (1/slope * i / size) if (i < slope * size) else (1/slope * (size - i) / size) for i in range(1, size + 1)])
 
 
-def power_spectrum(windows_strided, winsize):
-    """
-    Calculates power spectrum of given windowed signal
-    :param windows_strided: numpy.ndarray - 2D numpy array containing windowed signal
-    :param winsize: int - window size
-    :return: power: numpy.ndarray - 2D array with power spectrum, freq: numpy.ndarray - array with frequency vector
-    """
-    T = 1.0 / 5120
-    power = 2.0 / winsize * np.absolute(np.fft.fft(windows_strided)[:, :winsize//2])
-    freq = np.fft.fftfreq(winsize, d=T)[:winsize//2]
-    #power[:, ((freq <= 10) | (freq >= 500))] = 0
-    #return signal.medfilt(power, 3), freq
-    return power, freq
-
-
 def box_counting_dimension(sig, y_box_size_multiplier, subsampling):
     # Box-Counting Example: https://gist.github.com/rougier/e5eafc276a4e54f516ed5559df4242c0#file-fractal-dimension-py-L25
     n = 2 ** np.floor(np.log(len(sig)) / np.log(2))
