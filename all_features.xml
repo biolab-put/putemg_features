@@ -23,7 +23,7 @@
     <feature name="SSI" window="500" step="250" /> <!--Simple Square Integral-->
     <feature name="TM" window="500" step="250" order="4" /> <!--Absolute Temporal Moment-->
     <feature name="VAR" window="500" step="250" /> <!--Variance-->
-    <feature name="V" window="500" step="250" order="3"/> <!--V-Order-->
+    <feature name="V" window="500" step="250" v="3"/> <!--V-Order-->
     <feature name="WAMP" window="500" step="250" threshold="10"/> <!--Willison Amplitude-->
     <feature name="WL" window="500" step="250" /> <!--Waveform Length-->
     <feature name="ZC" window="1000" step="500" threshold="30" /> <!--Zero Crossing-->
@@ -41,5 +41,5 @@
     <feature name="MAX" window="1000" step="1000" order="6" cutoff="5" /> <!--Maximum Amplitude-->
     <feature name="SMR" window="5000" step="5000" n="13" /> <!--Signal-to-Motion Artifact Ratio-->
     <feature name="BC" window="5000" step="5000" y_box_size_multiplier="3" subsampling="25" /> <!--Box-Counting Dimension-->
-    <feature name="BC" window="5000" step="5000" power_box_size_multiplier="0.1" subsampling="50" /> <!--Power Spectral Density Fractal Dimension-->
+    <feature name="PSDFD" window="5000" step="5000" power_box_size_multiplier="0.1" subsampling="50" /> <!--Power Spectral Density Fractal Dimension-->
 </desc>

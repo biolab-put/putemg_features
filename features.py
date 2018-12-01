@@ -19,10 +19,14 @@ def calculate_feature(record, name, **kwargs):
     feature_func_name = 'feature_' + name  # Get feature function name based on name
     feature_values = pd.DataFrame()  # Create empty DataFrame
 
+    print('Calculating feature ' + name + ':', end='', flush=True)
+
     for column in record.filter(regex="EMG_\d"):  # For each column containing EMG data (for each Series)
+        print(' ' + column.split('_')[1], end='', flush=True)
         feature_label = name + '_' + column.split('_')[1]  # Prepare feature column label
         feature_values[feature_label] = globals()[feature_func_name](record[column], **kwargs)  # Call feature calculation by function name, and add to output DataFtame
 
+    print('', flush=True)
     return feature_values
 
 
