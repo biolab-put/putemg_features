@@ -3,7 +3,7 @@ Dedicated EMG feature calculator for putEMG Dataset http://biolab.put.poznan.pl/
 
 ## Usage
 ### Script
-putemg-feature-extractor script will calculate features of given putEMG record in HDF5 format based on feature decriptors in given XML file. See "all_features.xml" for file format and feature list along with its parameters. Output will be written to corresponding HDF5 format file with "_features" sufix.
+putemg-feature-extractor script will calculate features of given putEMG record in HDF5 format based on feature decriptors in given XML file. See "all_features.xml" for file format and feature list along with its parameters. Output will be written to corresponding HDF5 format file with "_features" suffix.
 
 ```bash
 putemg-feature-extractor.py <feature_config_file> <putemg_hdf5_file>
@@ -86,4 +86,4 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * SciPy - https://www.scipy.org/
 
 ## Attributions
-* PyEEG v0.4.0 - SampEn and ApEn features - GNU GLP v3 - http://pyeeg.org
+* PyEEG v0.4.0 - SampEn and ApEn features - GNU GPL v3 - http://pyeeg.org
