@@ -53,7 +53,8 @@ def window_trapezoidal(size, slope):
 
 
 def box_counting_dimension(sig, y_box_size_multiplier, subsampling):
-    # Box-Counting Example: https://gist.github.com/rougier/e5eafc276a4e54f516ed5559df4242c0#file-fractal-dimension-py-L25
+    # Box-Counting Example:
+    # https://gist.github.com/rougier/e5eafc276a4e54f516ed5559df4242c0#file-fractal-dimension-py-L25
     n = 2 ** np.floor(np.log(len(sig)) / np.log(2))
     n = int(np.log(n) / np.log(2))
     sizes = 2 ** np.arange(n, 1, -1)

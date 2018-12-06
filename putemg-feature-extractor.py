@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import os
 import sys
 import features
@@ -12,7 +14,8 @@ def usage():
     print('    <putemg_hdf5_file>      URL of putEMG HDF5 files containing experiment data')
     print()
     print('Examples:')
-    print('{:s} all_features.xml ./putEMG/Data-HDF5/emg_gestures-14-sequential-2018-04-06-10-30-11-595.hdf5'.format(os.path.basename(__file__)))
+    print('{:s} all_features.xml ./putEMG/Data-HDF5/emg_gestures-14-sequential-2018-04-06-10-30-11-595.hdf5'.
+          format(os.path.basename(__file__)))
     exit(1)
 
 

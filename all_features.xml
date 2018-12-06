@@ -1,45 +1,45 @@
 <?xml version="1.0"?>
 
 <desc>
-    <feature name="IAV" window="500" step="250" /> <!--Integral Absolute Value-->
-    <feature name="AAC" window="500" step="250" /> <!--Average Amplitude Change-->
-    <feature name="ApEn" window="1000" step="1000" m="2" r="0.2"/> <!--Approximate Entropy-->
-    <feature name="AR" window="10000" step="10000" order="4" /> <!--Auto-Regressive Coefficients-->
-    <feature name="CC" window="10000" step="10000" order="4" /> <!--Cepstral Coefficients-->
-    <feature name="DASDV" window="500" step="250" /> <!--Difference Absolute Standard Deviation Value-->
-    <feature name="Kurt" window="500" step="250" /> <!--Kurtosis-->
-    <feature name="LOG" window="500" step="250" /> <!--LOG Detector-->
-    <feature name="MAV1" window="500" step="250" /> <!--Modified Mean Absolute Value Type 1-->
-    <feature name="MAV2" window="500" step="250" /> <!--Modified Mean Absolute Value Type 2-->
-    <feature name="MAV" window="500" step="250" /> <!--Mean Absolute Value-->
-    <feature name="MAVSLP" window="500" step="250" /> <!--Mean Absolute Value Slope-->
-    <feature name="MHW" window="500" step="250" /> <!--Multiple Hamming Windows-->
-    <feature name="MTW" window="500" step="250" windowslope="0.25"/> <!--Multiple Trapezoidal Windows-->
-    <feature name="MYOP" window="1000" step="500" threshold="100"/> <!--Myopulse Percentage Rate-->
-    <feature name="RMS" window="500" step="250" /> <!--Root Mean Square-->
-    <feature name="SampleEn" window="1000" step="1000" m="2" r="0.2"/> <!--Sample Entropy-->
-    <feature name="Skew" window="2000" step="100"/> <!--Skewness-->
-    <feature name="SSC" window="500" step="250" threshold="16"/> <!--Slope Sign Change-->
-    <feature name="SSI" window="500" step="250" /> <!--Simple Square Integral-->
-    <feature name="TM" window="500" step="250" order="4" /> <!--Absolute Temporal Moment-->
-    <feature name="VAR" window="500" step="250" /> <!--Variance-->
-    <feature name="V" window="500" step="250" v="3"/> <!--V-Order-->
-    <feature name="WAMP" window="500" step="250" threshold="10"/> <!--Willison Amplitude-->
-    <feature name="WL" window="500" step="250" /> <!--Waveform Length-->
-    <feature name="ZC" window="1000" step="500" threshold="30" /> <!--Zero Crossing-->
-    <feature name="MNF" window="5000" step="5000" /> <!--Mean Frequency-->
-    <feature name="MDF" window="5000" step="5000" /> <!--Median Frequency-->
-    <feature name="PKF" window="5000" step="5000" /> <!--Peak Frequency-->
-    <feature name="MNP" window="5000" step="5000" /> <!--Mean Power-->
-    <feature name="TTP" window="5000" step="5000" /> <!--Total Power-->
-    <feature name="FR" window="5000" step="5000" flb="[15, 45]" fhb="[90, 500]" /> <!--Frequency Ratio-->
-    <feature name="VCF" window="5000" step="5000" /> <!--Variance of Central Frequency-->
-    <feature name="PSR" window="5000" step="5000" n="20" /> <!--Power Spectrum Ratio-->
-    <feature name="SNR" window="1000" step="1000" powerband="[10, 1000]" noiseband="[500, 1000]" /> <!--Signal-to-Noise Ratio-->
-    <feature name="DPR" window="1000" step="1000" band="[35, 600]" n="13" /> <!--Maximum-to-minimum Drop in Power Density Ratio-->
-    <feature name="OHM" window="1000" step="1000" /> <!--Power Spectrum Deformation-->
-    <feature name="MAX" window="1000" step="1000" order="6" cutoff="5" /> <!--Maximum Amplitude-->
-    <feature name="SMR" window="5000" step="5000" n="13" /> <!--Signal-to-Motion Artifact Ratio-->
-    <feature name="BC" window="5000" step="5000" y_box_size_multiplier="3" subsampling="25" /> <!--Box-Counting Dimension-->
-    <feature name="PSDFD" window="5000" step="5000" power_box_size_multiplier="0.1" subsampling="50" /> <!--Power Spectral Density Fractal Dimension-->
+    <feature name="IAV" window="2500" step="1250" /> <!--Integral Absolute Value-->
+    <feature name="AAC" window="2500" step="1250" /> <!--Average Amplitude Change-->
+    <feature name="ApEn" window="2500" step="1250" m="2" r="0.2"/> <!--Approximate Entropy-->
+    <feature name="AR" window="2500" step="1250" order="4" /> <!--Auto-Regressive Coefficients-->
+    <feature name="CC" window="2500" step="1250" order="4" /> <!--Cepstral Coefficients-->
+    <feature name="DASDV" window="2500" step="1250" /> <!--Difference Absolute Standard Deviation Value-->
+    <feature name="Kurt" window="2500" step="1250" /> <!--Kurtosis-->
+    <feature name="LOG" window="2500" step="1250" /> <!--LOG Detector-->
+    <feature name="MAV1" window="2500" step="1250" /> <!--Modified Mean Absolute Value Type 1-->
+    <feature name="MAV2" window="2500" step="1250" /> <!--Modified Mean Absolute Value Type 2-->
+    <feature name="MAV" window="2500" step="1250" /> <!--Mean Absolute Value-->
+    <feature name="MAVSLP" window="2500" step="1250" /> <!--Mean Absolute Value Slope-->
+    <feature name="MHW" window="2500" step="1250" /> <!--Multiple Hamming Windows-->
+    <feature name="MTW" window="2500" step="1250" windowslope="0.25"/> <!--Multiple Trapezoidal Windows-->
+    <feature name="MYOP" window="2500" step="1250" threshold="100"/> <!--Myopulse Percentage Rate-->
+    <feature name="RMS" window="2500" step="1250" /> <!--Root Mean Square-->
+    <feature name="SampleEn" window="2500" step="1250" m="2" r="0.2"/> <!--Sample Entropy-->
+    <feature name="Skew" window="2500" step="1250"/> <!--Skewness-->
+    <feature name="SSC" window="2500" step="1250" threshold="16"/> <!--Slope Sign Change-->
+    <feature name="SSI" window="2500" step="1250" /> <!--Simple Square Integral-->
+    <feature name="TM" window="2500" step="1250" order="4" /> <!--Absolute Temporal Moment-->
+    <feature name="VAR" window="2500" step="1250" /> <!--Variance-->
+    <feature name="V" window="2500" step="1250" v="3"/> <!--V-Order-->
+    <feature name="WAMP" window="2500" step="1250" threshold="10"/> <!--Willison Amplitude-->
+    <feature name="WL" window="2500" step="1250" /> <!--Waveform Length-->
+    <feature name="ZC" window="2500" step="1250" threshold="30" /> <!--Zero Crossing-->
+    <feature name="MNF" window="2500" step="1250" /> <!--Mean Frequency-->
+    <feature name="MDF" window="2500" step="1250" /> <!--Median Frequency-->
+    <feature name="PKF" window="2500" step="1250" /> <!--Peak Frequency-->
+    <feature name="MNP" window="2500" step="1250" /> <!--Mean Power-->
+    <feature name="TTP" window="2500" step="1250" /> <!--Total Power-->
+    <feature name="FR" window="2500" step="1250" flb="[15, 45]" fhb="[90, 500]" /> <!--Frequency Ratio-->
+    <feature name="VCF" window="2500" step="1250" /> <!--Variance of Central Frequency-->
+    <feature name="PSR" window="2500" step="1250" n="20" /> <!--Power Spectrum Ratio-->
+    <feature name="SNR" window="2500" step="1250" powerband="[10, 1000]" noiseband="[500, 1000]" /> <!--Signal-to-Noise Ratio-->
+    <feature name="DPR" window="2500" step="1250" band="[35, 600]" n="13" /> <!--Maximum-to-minimum Drop in Power Density Ratio-->
+    <feature name="OHM" window="2500" step="1250" /> <!--Power Spectrum Deformation-->
+    <feature name="MAX" window="2500" step="1250" order="6" cutoff="5" /> <!--Maximum Amplitude-->
+    <feature name="SMR" window="2500" step="1250" n="13" /> <!--Signal-to-Motion Artifact Ratio-->
+    <feature name="BC" window="2500" step="1250" y_box_size_multiplier="3" subsampling="25" /> <!--Box-Counting Dimension-->
+    <feature name="PSDFD" window="2500" step="1250" power_box_size_multiplier="0.1" subsampling="50" /> <!--Power Spectral Density Fractal Dimension-->
 </desc>

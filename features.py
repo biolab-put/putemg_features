@@ -7,7 +7,7 @@ from scipy import stats, signal
 from numpy.lib.stride_tricks import as_strided
 
 
-def calculate_feature(record, name, **kwargs):
+def calculate_feature(record: pd.DataFrame, name, **kwargs):
     """
     Calculates feature given name of given pandas.DataFrame. Feature is calculated for each Series with
     column name of "EMG_\d". Feature parameters are passed by **kwargs, eg. window=500, step=250
@@ -21,10 +21,19 @@ def calculate_feature(record, name, **kwargs):
 
     print('Calculating feature ' + name + ':', end='', flush=True)
 
-    for column in record.filter(regex="EMG_\d"):  # For each column containing EMG data (for each Series)
+    for column in record.filter(regex="EMG_\d+"):  # For each column containing EMG data (for each Series)
         print(' ' + column.split('_')[1], end='', flush=True)
         feature_label = name + '_' + column.split('_')[1]  # Prepare feature column label
-        feature_values[feature_label] = globals()[feature_func_name](record[column], **kwargs)  # Call feature calculation by function name, and add to output DataFtame
+        # Call feature calculation by function name, and add to output DataFrame
+        feature = globals()[feature_func_name](record[column], **kwargs)
+        if isinstance(feature, pd.Series):
+            feature_values[feature_label] = feature
+        elif isinstance(feature, pd.DataFrame):
+            d = {}
+            for c in feature.columns:
+                d[c] = feature_label + "_" + c
+            feature = feature.rename(columns=d)
+            feature_values = feature_values.join(feature, how='outer')
 
     print('', flush=True)
     return feature_values
@@ -43,9 +52,10 @@ def features_from_xml(xml_file_url, hdf5_file_url):
 
     xml_root = ET.parse(xml_file_url).getroot()  # Load XML file with feature config
     for xml_entry in xml_root.iter('feature'):  # For each feature entry in XML file
-        xml_entry.attrib = ut.convert_types_in_dict(xml_entry.attrib)  # Convert attribute dictrionary to Python literals
-        feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib), how="outer")  # add to output frame values calculated by each feature function
-
+        # Convert attribute dictionary to Python literals
+        xml_entry.attrib = ut.convert_types_in_dict(xml_entry.attrib)
+        # add to output frame values calculated by each feature function
+        feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib), how="outer")
     return feature_frame
 
 
@@ -58,7 +68,8 @@ def feature_IAV(series, window, step):
 def feature_AAC(series, window, step):
     """Average Amplitude Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.divide(np.sum(np.abs(np.diff(windows_strided)), axis=1), window), index=series.index[indexes])
+    return pd.Series(data=np.divide(np.sum(np.abs(np.diff(windows_strided)), axis=1), window),
+                     index=series.index[indexes])
 
 
 def feature_ApEn(series, window, step, m, r):
@@ -66,35 +77,39 @@ def feature_ApEn(series, window, step, m, r):
     AnEn feature is using PyEEG library v0.4.0 as it is, licensed with GNU GPL v3
     http://pyeeg.org"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.ap_entropy(win, m, r), axis=1, arr=windows_strided), index=series.index[indexes])
+    return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.ap_entropy(win, m, r),
+                                              axis=1, arr=windows_strided), index=series.index[indexes])
 
 
-def feature_AR(series, window, step, order):
+def feature_AR(series, window, step, order) -> pd.DataFrame:
     """Auto-Regressive Coefficients"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
 
-    win_coefs = pd.Series()
+    column_names = [str(i) for i in range(0, order)]
+    win_coefs = pd.DataFrame(index=series.index[indexes], columns=column_names, dtype=np.float64)
+
     for widx in range(len(windows_strided)):
         stride = windows_strided[widx].strides[0]
         stride_count = len(windows_strided[widx]) - order
         x = as_strided(windows_strided[widx], shape=[stride_count, order], strides=(stride, stride))
         y = windows_strided[widx][order:]
 
-        a, _, _, _ = np.linalg.lstsq(x,y, rcond=None)
-        win_coefs.at[series.index[indexes[widx]]] = a
+        a, _, _, _ = np.linalg.lstsq(x, y, rcond=None)
 
+        win_coefs.loc[series.index[indexes[widx]], :] = a
     return win_coefs
 
 
 def feature_CC(series, window, step, order):
     """Cepstral Coefficients"""
     win_coefs = feature_AR(series, window, step, order)
-    for coefs in win_coefs:
-        coefs[0] = -coefs[0]
+    coefs = win_coefs.values
+    coefs[:, 0] = -coefs[:, 0]
+    for r in range(0, coefs.shape[0]):
         for p in range(1, order):
-            coefs[p] = -coefs[p] - np.sum(
-                [1 - (l / (p + 1)) for l in range(1, p + 1)] * np.full(p, coefs[p] * coefs[p - 1]))
-
+            coefs[r, p] = -coefs[r, p] - np.sum(
+                [1 - (l / (p + 1)) for l in range(1, p + 1)] * np.full(p, coefs[r, p] * coefs[r, p - 1]))
+    win_coefs.loc[:, :] = coefs
     return win_coefs
 
 
@@ -151,7 +166,8 @@ def feature_MHW(series, window, step):
 def feature_MTW(series, window, step, windowslope):
     """Multiple Trapezoidal Windows"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.sum(np.square(windows_strided) * ut.window_trapezoidal(window, windowslope), axis=1), index=series.index[indexes])
+    return pd.Series(data=np.sum(np.square(windows_strided) * ut.window_trapezoidal(window, windowslope), axis=1),
+                     index=series.index[indexes])
 
 
 def feature_MYOP(series, window, step, threshold):
@@ -171,7 +187,8 @@ def feature_SampEn(series, window, step, m, r):
     SampEn feature is using PyEEG library v 0.02_r2 as it is, licensed with GNU GPL v3
     http://pyeeg.sourceforge.net/"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.samp_entropy(win, m, r), axis=1, arr=windows_strided), index=series.index[indexes])
+    return pd.Series(data=np.apply_along_axis(lambda win: pyeeg.samp_entropy(win, m, r), axis=1, arr=windows_strided),
+                     index=series.index[indexes])
 
 
 def feature_Skew(series, window, step):
@@ -183,7 +200,8 @@ def feature_Skew(series, window, step):
 def feature_SSC(series, window, step, threshold):
     """Slope Sign Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.apply_along_axis(lambda x: np.sum((np.diff(x[:-1]) * np.diff(x[1:])) <= -threshold), axis=1, arr=windows_strided), index=series.index[indexes])
+    return pd.Series(data=np.apply_along_axis(lambda x: np.sum((np.diff(x[:-1]) * np.diff(x[1:])) <= -threshold),
+                                              axis=1, arr=windows_strided), index=series.index[indexes])
 
 
 def feature_SSI(series, window, step):
@@ -207,7 +225,8 @@ def feature_VAR(series, window, step):
 def feature_V(series, window, step, v):
     """V-Order"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.power(np.abs(np.mean(np.power(windows_strided, v), axis=1)), 1./v), index=series.index[indexes])
+    return pd.Series(data=np.power(np.abs(np.mean(np.power(windows_strided, v), axis=1)), 1./v),
+                     index=series.index[indexes])
 
 
 def feature_WAMP(series, window, step, threshold):
@@ -225,7 +244,8 @@ def feature_WL(series, window, step):
 def feature_ZC(series, window, step, threshold):
     """Zero Crossing"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -threshold) | (x > threshold)] > 0)), axis=1, arr=windows_strided)
+    zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -threshold) | (x > threshold)] > 0)), axis=1,
+                             arr=windows_strided)
     return pd.Series(data=zc, index=series.index[indexes])
 
 
@@ -305,14 +325,18 @@ def feature_PSR(series, window, step, n):
     PKF_id = np.argmax(power, axis=1)
     lb = np.where(PKF_id - 20 < 0, 0, PKF_id - 20)
     hb = np.where(PKF_id + 20 > window, window, PKF_id + 20)
-    return pd.Series(data=[sum(p[l:h]) for p, l, h in zip(power, lb, hb)] / np.sum(power, axis=1), index=series.index[indexes])
+    return pd.Series(data=[sum(p[l:h]) for p, l, h in zip(power, lb, hb)] / np.sum(power, axis=1),
+                     index=series.index[indexes])
 
 
 def feature_SNR(series, window, step, powerband, noiseband):
     """Signal-to-Noise Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
-    snr = np.apply_along_axis(lambda p: np.sum(p[(freq > powerband[0]) & (freq < powerband[1])]) / (np.sum(p[(freq > noiseband[0]) & (freq < noiseband[1])]) * np.max(freq)), axis=1, arr=power)
+    snr = np.apply_along_axis(lambda p:
+                              np.sum(p[(freq > powerband[0]) & (freq < powerband[1])]) /
+                              (np.sum(p[(freq > noiseband[0]) & (freq < noiseband[1])]) * np.max(freq)),
+                              axis=1, arr=power)
     return pd.Series(data=snr, index=series.index[indexes])
 
 
@@ -349,7 +373,8 @@ def feature_MAX(series, window, step, order, cutoff):
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     fs = 5120
     b, a = signal.butter(order, cutoff / (0.5 * fs), btype='lowpass', analog=False, output='ba')
-    return pd.Series(data=np.max(signal.lfilter(b, a, np.abs(windows_strided), axis=1), axis=1), index=series.index[indexes])
+    return pd.Series(data=np.max(signal.lfilter(b, a, np.abs(windows_strided), axis=1), axis=1),
+                     index=series.index[indexes])
 
 
 def feature_SMR(series, window, step, n):
@@ -372,7 +397,8 @@ def feature_SMR(series, window, step, n):
         max_idx = np.argmax(mean) + int(np.floor(n / 2.0)) + freq_over35_idx
         a = max / freq[max_idx]
 
-        smr.at[series.index[indexes[pidx]]] = np.sum(power[pidx][freq < 600]) / np.sum(power[pidx][power[pidx] > (freq*a)])
+        smr.at[series.index[indexes[pidx]]] =\
+            np.sum(power[pidx][freq < 600]) / np.sum(power[pidx][power[pidx] > (freq*a)])
 
     return pd.Series(data=smr, index=series.index[indexes])
 
@@ -380,11 +406,15 @@ def feature_SMR(series, window, step, n):
 def feature_BC(series, window, step, y_box_size_multiplier, subsampling):
     """Box-Counting Dimension"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.apply_along_axis(lambda sig: ut.box_counting_dimension(sig, y_box_size_multiplier, subsampling), axis=1, arr=windows_strided), index=series.index[indexes])
+    return pd.Series(data=np.apply_along_axis(lambda sig:
+                                              ut.box_counting_dimension(sig, y_box_size_multiplier, subsampling),
+                                              axis=1, arr=windows_strided), index=series.index[indexes])
 
 
 def feature_PSDFD(series, window, step, power_box_size_multiplier, subsampling):
     """Power Spectral Density Fractal Dimension"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
-    return pd.Series(data=np.apply_along_axis(lambda sig: ut.box_counting_dimension(sig, power_box_size_multiplier, subsampling), axis=1, arr=power), index=series.index[indexes])
+    return pd.Series(data=np.apply_along_axis(lambda sig:
+                                              ut.box_counting_dimension(sig, power_box_size_multiplier, subsampling),
+                                              axis=1, arr=power), index=series.index[indexes])

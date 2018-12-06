@@ -84,6 +84,7 @@ df3 = ft.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, 
 * Pandas - https://pandas.pydata.org/
 * Numpy - http://www.numpy.org/
 * SciPy - https://www.scipy.org/
+* PyEEG - https://github.com/forrestbao/pyeeg
 
 ## Attributions
-* PyEEG v0.4.0 - SampEn and ApEn features - GNU GPL v3 - http://pyeeg.org
+* PyEEG v0.4.0 - SampEn and ApEn features - GNU GPL v3 - https://github.com/forrestbao/pyeeg
