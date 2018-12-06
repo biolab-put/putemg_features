@@ -47,7 +47,7 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     :param hdf5_file_url: string - url to putEMG hdf5 record file
     :return: pandas.DataFrame - DataFrame containing output for all desired features
     """
-    record = pd.read_hdf(hdf5_file_url)  # Read HDF5 file into pandas DataFrame
+    record: pd.DataFrame = pd.read_hdf(hdf5_file_url)  # Read HDF5 file into pandas DataFrame
     feature_frame = pd.DataFrame()
 
     xml_root = ET.parse(xml_file_url).getroot()  # Load XML file with feature config
@@ -56,6 +56,10 @@ def features_from_xml(xml_file_url, hdf5_file_url):
         xml_entry.attrib = ut.convert_types_in_dict(xml_entry.attrib)
         # add to output frame values calculated by each feature function
         feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib), how="outer")
+
+    if "TRAJ_GT" in record.columns:
+        feature_frame["TRAJ_GT"] = record.loc[feature_frame.index, "TRAJ_GT"]
+
     return feature_frame
 
 
