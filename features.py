@@ -17,7 +17,7 @@ def calculate_feature(record: pd.DataFrame, name, **kwargs):
     :param kwargs: parameters for feature calculation.
     :return: pandas.DataFrame - DataFrame containing output of desired feature
     """
-    feature_func_name = 'feature_' + name  # Get feature function name based on name
+    feature_func_name = 'feature_' + name.lower()  # Get feature function name based on name
     feature_values = pd.DataFrame()  # Create empty DataFrame
 
     start = time.time()
@@ -66,20 +66,20 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     return feature_frame
 
 
-def feature_IAV(series, window, step):
+def feature_iav(series, window, step):
     """Integral Absolute Value"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.abs(windows_strided), axis=1), index=series.index[indexes])
 
 
-def feature_AAC(series, window, step):
+def feature_aac(series, window, step):
     """Average Amplitude Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.divide(np.sum(np.abs(np.diff(windows_strided)), axis=1), window),
                      index=series.index[indexes])
 
 
-def feature_ApEn(series, window, step, m, r):
+def feature_apen(series, window, step, m, r):
     """Approximate Entropy
     AnEn feature is using PyEEG library v0.4.0 as it is, licensed with GNU GPL v3
     http://pyeeg.org"""
@@ -88,7 +88,7 @@ def feature_ApEn(series, window, step, m, r):
                                               axis=1, arr=windows_strided), index=series.index[indexes])
 
 
-def feature_AR(series, window, step, order) -> pd.DataFrame:
+def feature_ar(series, window, step, order) -> pd.DataFrame:
     """Auto-Regressive Coefficients"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
 
@@ -107,9 +107,9 @@ def feature_AR(series, window, step, order) -> pd.DataFrame:
     return win_coefs
 
 
-def feature_CC(series, window, step, order):
+def feature_cc(series, window, step, order):
     """Cepstral Coefficients"""
-    win_coefs = feature_AR(series, window, step, order)
+    win_coefs = feature_ar(series, window, step, order)
     coefs = win_coefs.values
     coefs[:, 0] = -coefs[:, 0]
     for r in range(0, coefs.shape[0]):
@@ -120,76 +120,76 @@ def feature_CC(series, window, step, order):
     return win_coefs
 
 
-def feature_DASDV(series, window, step):
+def feature_dasdv(series, window, step):
     """Difference Absolute Standard Deviation Value"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sqrt(np.mean(np.square(np.diff(windows_strided)), axis=1)), index=series.index[indexes])
 
 
-def feature_Kurt(series, window, step):
+def feature_kurt(series, window, step):
     """Kurtosis"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=stats.kurtosis(windows_strided, axis=1), index=series.index[indexes])
 
 
-def feature_LOG(series, window, step):
+def feature_log(series, window, step):
     """Log Detector"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.exp(np.mean(np.log(np.abs(windows_strided)), axis=1)), index=series.index[indexes])
 
 
-def feature_MAV1(series, window, step):
+def feature_mav1(series, window, step):
     """Modified Mean Absolute Value Type 1"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     win_weight = [1 if ((0.25*window <= i) & (i <= 0.75*window)) else 0.5 for i in range(1, window+1)]
     return pd.Series(data=np.mean(np.abs(windows_strided) * win_weight, axis=1), index=series.index[indexes])
 
 
-def feature_MAV2(series, window, step):
+def feature_mav2(series, window, step):
     """Modified Mean Absolute Value Type 2"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     win_weight = ut.window_trapezoidal(window, 0.25)
     return pd.Series(data=np.mean(np.abs(windows_strided) * win_weight, axis=1), index=series.index[indexes])
 
 
-def feature_MAV(series, window, step):
+def feature_mav(series, window, step):
     """Mean Absolute Value"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.mean(np.abs(windows_strided), axis=1), index=series.index[indexes])
 
 
-def feature_MAVSLP(series, window, step):
+def feature_mavslp(series, window, step):
     """Mean Absolute Value Slope"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.diff(np.mean(np.abs(windows_strided), axis=1)), index=series.index[indexes[1:]])
 
 
-def feature_MHW(series, window, step):
+def feature_mhw(series, window, step):
     """Multiple Hamming Windows"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.square(windows_strided * np.hamming(window)), axis=1), index=series.index[indexes])
 
 
-def feature_MTW(series, window, step, windowslope):
+def feature_mtw(series, window, step, windowslope):
     """Multiple Trapezoidal Windows"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.square(windows_strided) * ut.window_trapezoidal(window, windowslope), axis=1),
                      index=series.index[indexes])
 
 
-def feature_MYOP(series, window, step, threshold):
+def feature_myop(series, window, step, threshold):
     """Myopulse Percentage Rate"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(windows_strided > threshold, axis=1) / window, index=series.index[indexes])
 
 
-def feature_RMS(series, window, step):
+def feature_rms(series, window, step):
     """Root Mean Square"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sqrt(np.mean(np.square(windows_strided), axis=1)), index=series.index[indexes])
 
 
-def feature_SampEn(series, window, step, m, r):
+def feature_sampn(series, window, step, m, r):
     """Sample Entropy
     SampEn feature is using PyEEG library v 0.02_r2 as it is, licensed with GNU GPL v3
     http://pyeeg.sourceforge.net/"""
@@ -198,57 +198,57 @@ def feature_SampEn(series, window, step, m, r):
                      index=series.index[indexes])
 
 
-def feature_Skew(series, window, step):
+def feature_skew(series, window, step):
     """Skewness"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=stats.skew(windows_strided, axis=1), index=series.index[indexes])
 
 
-def feature_SSC(series, window, step, threshold):
+def feature_ssc(series, window, step, threshold):
     """Slope Sign Change"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.apply_along_axis(lambda x: np.sum((np.diff(x[:-1]) * np.diff(x[1:])) <= -threshold),
                                               axis=1, arr=windows_strided), index=series.index[indexes])
 
 
-def feature_SSI(series, window, step):
+def feature_ssi(series, window, step):
     """Simple Square Integral"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.square(windows_strided), axis=1), index=series.index[indexes])
 
 
-def feature_TM(series, window, step, order):
+def feature_tm(series, window, step, order):
     """Absolute Temporal Moment"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.abs(np.mean(np.power(windows_strided, order), axis=1)), index=series.index[indexes])
 
 
-def feature_VAR(series, window, step):
+def feature_var(series, window, step):
     """Variance"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.var(windows_strided, axis=1), index=series.index[indexes])
 
 
-def feature_V(series, window, step, v):
+def feature_v(series, window, step, v):
     """V-Order"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.power(np.abs(np.mean(np.power(windows_strided, v), axis=1)), 1./v),
                      index=series.index[indexes])
 
 
-def feature_WAMP(series, window, step, threshold):
+def feature_wamp(series, window, step, threshold):
     """Willison Amplitude"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.diff(windows_strided) >= threshold, axis=1), index=series.index[indexes])
 
 
-def feature_WL(series, window, step):
+def feature_wl(series, window, step):
     """Waveform Length"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.sum(np.diff(windows_strided), axis=1), index=series.index[indexes])
 
 
-def feature_ZC(series, window, step, threshold):
+def feature_zc(series, window, step, threshold):
     """Zero Crossing"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     zc = np.apply_along_axis(lambda x: np.sum(np.diff(x[(x < -threshold) | (x > threshold)] > 0)), axis=1,
@@ -256,56 +256,56 @@ def feature_ZC(series, window, step, threshold):
     return pd.Series(data=zc, index=series.index[indexes])
 
 
-def feature_MNF(series, window, step):
+def feature_mnf(series, window, step):
     """Mean Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.sum(power*freq, axis=1) / np.sum(power, axis=1), index=series.index[indexes])
 
 
-def feature_MDF(series, window, step):
+def feature_mdf(series, window, step):
     """Median Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
-    TTPhalf = np.sum(power, axis=1)/2
-    MDF = np.zeros(len(windows_strided))
+    ttp_half = np.sum(power, axis=1)/2
+    mdf = np.zeros(len(windows_strided))
     for w in range(len(power)):
         for s in range(1, len(power) + 1):
-            if np.sum(power[w, :s]) > TTPhalf[w]:
-                MDF[w] = freq[s - 1]
+            if np.sum(power[w, :s]) > ttp_half[w]:
+                mdf[w] = freq[s - 1]
                 break
-    return pd.Series(data=MDF, index=series.index[indexes])
+    return pd.Series(data=mdf, index=series.index[indexes])
 
 
-def feature_PKF(series, window, step):
+def feature_pkf(series, window, step):
     """Peak Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=freq[np.argmax(power, axis=1)], index=series.index[indexes])
 
 
-def feature_MNP(series, window, step):
+def feature_mnp(series, window, step):
     """Mean Power"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.mean(power, axis=1), index=series.index[indexes])
 
 
-def feature_TTP(series, window, step):
+def feature_ttp(series, window, step):
     """Total Power"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.sum(power, axis=1), index=series.index[indexes])
 
 
-def feature_SM(series, window, step, order):
+def feature_sm(series, window, step, order):
     """Spectral Moment"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.sum(power * np.power(freq, order), axis=1), index=series.index[indexes])
 
 
-def feature_FR(series, window, step, flb, fhb):
+def feature_fr(series, window, step, flb, fhb):
     """Frequency Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
@@ -314,18 +314,18 @@ def feature_FR(series, window, step, flb, fhb):
     return pd.Series(data=(lb / hb), index=series.index[indexes])
 
 
-def feature_VCF(series, window, step):
+def feature_vcf(series, window, step):
     """Variance of Central Frequency"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
 
-    def SM(order):
+    def sm(order):
         return np.sum(power * np.power(freq, order), axis=1)
 
-    return pd.Series(data=SM(2)/SM(0) - np.square(SM(1)/SM(0)), index=series.index[indexes])
+    return pd.Series(data=sm(2)/sm(0) - np.square(sm(1)/sm(0)), index=series.index[indexes])
 
 
-def feature_PSR(series, window, step, n):
+def feature_psr(series, window, step, n):
     """Power Spectrum Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
@@ -336,7 +336,7 @@ def feature_PSR(series, window, step, n):
                      index=series.index[indexes])
 
 
-def feature_SNR(series, window, step, powerband, noiseband):
+def feature_snr(series, window, step, powerband, noiseband):
     """Signal-to-Noise Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
@@ -347,7 +347,7 @@ def feature_SNR(series, window, step, powerband, noiseband):
     return pd.Series(data=snr, index=series.index[indexes])
 
 
-def feature_DPR(series, window, step, band, n):
+def feature_dpr(series, window, step, band, n):
     """Maximum-to-minimum Drop in Power Density Ratio"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
@@ -364,18 +364,18 @@ def feature_DPR(series, window, step, band, n):
     return pd.Series(data=dpr, index=series.index[indexes])
 
 
-def feature_OHM(series, window, step):
+def feature_ohm(series, window, step):
     """Power Spectrum Deformation"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
 
-    def SM(order):
+    def sm(order):
         return np.sum(power * np.power(freq, order), axis=1)
 
-    return pd.Series(data=np.sqrt(SM(2)/SM(0)) / (SM(1)/SM(0)), index=series.index[indexes])
+    return pd.Series(data=np.sqrt(sm(2)/sm(0)) / (sm(1)/sm(0)), index=series.index[indexes])
 
 
-def feature_MAX(series, window, step, order, cutoff):
+def feature_max(series, window, step, order, cutoff):
     """Maximum Amplitude"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     fs = 5120
@@ -384,7 +384,7 @@ def feature_MAX(series, window, step, order, cutoff):
                      index=series.index[indexes])
 
 
-def feature_SMR(series, window, step, n):
+def feature_smr(series, window, step, n):
     """Signal-to-Motion Artifact Ratio"""
     # TODO: Verification Needed
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
@@ -410,7 +410,7 @@ def feature_SMR(series, window, step, n):
     return pd.Series(data=smr, index=series.index[indexes])
 
 
-def feature_BC(series, window, step, y_box_size_multiplier, subsampling):
+def feature_bc(series, window, step, y_box_size_multiplier, subsampling):
     """Box-Counting Dimension"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.apply_along_axis(lambda sig:
@@ -418,7 +418,7 @@ def feature_BC(series, window, step, y_box_size_multiplier, subsampling):
                                               axis=1, arr=windows_strided), index=series.index[indexes])
 
 
-def feature_PSDFD(series, window, step, power_box_size_multiplier, subsampling):
+def feature_psdfd(series, window, step, power_box_size_multiplier, subsampling):
     """Power Spectral Density Fractal Dimension"""
     windows_strided, indexes = ut.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
