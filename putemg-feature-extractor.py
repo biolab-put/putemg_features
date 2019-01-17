@@ -11,7 +11,7 @@ def usage():
     print()
     print('Arguments:')
     print('    <feature_config_file>   URL to XML file containing feature descriptors')
-    print('    <putemg_hdf5_file>      URL of putEMG HDF5 files containing experiment data')
+    print('    <putemg_hdf5_file>      URL of putEMG HDF5 file containing experiment data')
     print()
     print('Examples:')
     print('{:s} all_features.xml ./putEMG/Data-HDF5/emg_gestures-14-sequential-2018-04-06-10-30-11-595.hdf5'.

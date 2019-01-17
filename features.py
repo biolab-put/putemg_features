@@ -60,8 +60,8 @@ def features_from_xml(xml_file_url, hdf5_file_url):
         # add to output frame values calculated by each feature function
         feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib), how="outer")
 
-    if "TRAJ_GT" in record.columns:
-        feature_frame["TRAJ_GT"] = record.loc[feature_frame.index, "TRAJ_GT"]
+    for other_data in list(record.filter(regex="^(?!EMG_).*")):
+        feature_frame[other_data] = record.loc[feature_frame.index, other_data]
 
     return feature_frame
 
