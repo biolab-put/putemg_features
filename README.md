@@ -1,5 +1,5 @@
 # putemg-feature-extractor
-Dedicated EMG feature calculator for putEMG Dataset http://biolab.put.poznan.pl/putemg-dataset/
+Dedicated EMG feature calculator for putEMG dataset https://biolab.put.poznan.pl/putemg-dataset/
 
 ## Usage
 ### Script
