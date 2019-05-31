@@ -4,6 +4,8 @@ import numpy as np
 from numpy.lib.stride_tricks import as_strided
 from scipy import interpolate
 
+__all__ = ["convert_types_in_dict", "moving_window_stride", "window_trapezoidal", "box_counting_dimension"]
+
 
 def convert_types_in_dict(xml_dict):
     """

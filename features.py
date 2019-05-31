@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import utilities as ut
-import pyeeg
+from pyeeg import pyeeg
 import xml.etree.ElementTree as ET
 from scipy import stats, signal
 from numpy.lib.stride_tricks import as_strided
@@ -22,7 +22,7 @@ def calculate_feature(record: pd.DataFrame, name, **kwargs):
 
     start = time.time()
     print('Calculating feature ' + name + ':', end='', flush=True)
-    for column in record.filter(regex="EMG_\d+"):  # For each column containing EMG data (for each Series)
+    for column in record.filter(regex=r"EMG_\d+"):  # For each column containing EMG data (for each Series)
         print(' ' + column.split('_')[1], end='', flush=True)
         feature_label = name + '_' + column.split('_')[1]  # Prepare feature column label
         # Call feature calculation by function name, and add to output DataFrame
