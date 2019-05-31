@@ -1,0 +1,3 @@
+[submodule "pyeeg"]
+	path = pyeeg
+	url = https://github.com/forrestbao/pyeeg
