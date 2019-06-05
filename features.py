@@ -173,7 +173,8 @@ def feature_mhw(series, window, step):
 def feature_mtw(series, window, step, windowslope):
     """Multiple Trapezoidal Windows"""
     windows_strided, indexes = feature_utilities.moving_window_stride(series.values, window, step)
-    return pd.Series(data=np.sum(np.square(windows_strided) * feature_utilities.window_trapezoidal(window, windowslope), axis=1),
+    return pd.Series(data=np.sum(np.square(windows_strided) * feature_utilities.window_trapezoidal(window, windowslope),
+                                 axis=1),
                      index=series.index[indexes])
 
 
@@ -414,7 +415,8 @@ def feature_bc(series, window, step, y_box_size_multiplier, subsampling):
     """Box-Counting Dimension"""
     windows_strided, indexes = feature_utilities.moving_window_stride(series.values, window, step)
     return pd.Series(data=np.apply_along_axis(lambda sig:
-                                              feature_utilities.box_counting_dimension(sig, y_box_size_multiplier, subsampling),
+                                              feature_utilities.box_counting_dimension(sig, y_box_size_multiplier,
+                                                                                       subsampling),
                                               axis=1, arr=windows_strided), index=series.index[indexes])
 
 
@@ -423,5 +425,6 @@ def feature_psdfd(series, window, step, power_box_size_multiplier, subsampling):
     windows_strided, indexes = feature_utilities.moving_window_stride(series.values, window, step)
     freq, power = signal.periodogram(windows_strided, 5120)
     return pd.Series(data=np.apply_along_axis(lambda sig:
-                                              feature_utilities.box_counting_dimension(sig, power_box_size_multiplier, subsampling),
+                                              feature_utilities.box_counting_dimension(sig, power_box_size_multiplier,
+                                                                                       subsampling),
                                               axis=1, arr=power), index=series.index[indexes])
