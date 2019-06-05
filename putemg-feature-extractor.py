@@ -2,7 +2,7 @@
 
 import os
 import sys
-import features
+from . import features
 
 
 def usage():

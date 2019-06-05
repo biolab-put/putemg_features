@@ -1,2 +1,2 @@
 from .features import feature_bc
-from .utilities import *
+from .feature_utilities import *
