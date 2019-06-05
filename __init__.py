@@ -1,2 +1,2 @@
 from .features import feature_bc
-from .feature_utilities import *
+from .biolab_utilities import *
