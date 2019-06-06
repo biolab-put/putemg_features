@@ -1,12 +1,17 @@
+from . import biolab_utilities
+
+from .pyeeg import pyeeg
+
 import pandas as pd
 import numpy as np
-from .pyeeg import pyeeg
-from . import biolab_utilities
-import xml.etree.ElementTree as ET
-from scipy import stats, signal
 from numpy.lib.stride_tricks import as_strided
-import time
+
+from scipy import stats, signal
 from scipy import interpolate
+
+import xml.etree.ElementTree as ET
+
+import time
 
 
 def calculate_feature(record: pd.DataFrame, name, **kwargs):
