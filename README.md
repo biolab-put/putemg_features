@@ -7,7 +7,7 @@ putemg_features can be used as Python3 module. In order to calculate features of
 ```python
 import putemg_features
 
-xml_url = './putemg_features/all_features.xml'
+xml_url = 'all_features.xml'
 hdf5_url = './putEMG/Data-HDF5/emg_gestures-03-repeats_long-2018-05-11-11-05-00-695.hdf5'
 ft = putemg_features.features_from_xml(xml_url, hdf5_url)
 ```
@@ -83,7 +83,6 @@ zc = putemg_features.feature_zc(noise, 100, 100)
 * Pandas - https://pandas.pydata.org/
 * Numpy - http://www.numpy.org/
 * SciPy - https://www.scipy.org/
-* PyEEG - https://github.com/forrestbao/pyeeg
 
 ## Attributions
 * PyEEG v0.4.0 - SampEn and ApEn features - GNU GPL v3 - https://github.com/forrestbao/pyeeg
