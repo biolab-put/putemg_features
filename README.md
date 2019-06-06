@@ -2,7 +2,7 @@
 Dedicated EMG feature calculator for putEMG dataset https://biolab.put.poznan.pl/putemg-dataset/
 
 ## Usage
-putemg-feature-extractor can be used as Python3 module. In order to calculate features of a given hdf5 putEMG file based on XML feature descriptor file see example below. See "all_features.xml" for file format and feature list along with its parameters.
+putemg_features can be used as Python3 module. In order to calculate features of a given hdf5 putEMG file based on XML feature descriptor file see example below. See "all_features.xml" for file format and feature list along with its parameters.
 
 ```python
 import putemg_features
@@ -21,6 +21,17 @@ record = pd.read_hdf('./putEMG/Data-HDF5/emg_gestures-03-repeats_long-2018-05-11
 df1 = putemg_features.calculate_feature(record, 'ZC', window=1000, step=500, threshold=30)
 df2 = putemg_features.calculate_feature(record[22.5:30.9], name='RMS', window=500, step=250)
 df3 = putemg_features.calculate_feature(record[1:10][['EMG_1', 'EMG_5']], 'RMS', window=500, step=250)
+```
+
+Feature calculation funcions can not only be used with putEMG data, but also with any other data given in pd.Series format, eg.:
+```python
+import putemg_features
+import pandas as pd
+import numpy as np
+
+noise = pd.Series(np.concatenate((np.random.normal(0,1,100), np.random.normal(0,20,100), np.random.normal(0,5,100))))
+rms = putemg_features.feature_rms(noise, 100, 100)
+zc = putemg_features.feature_zc(noise, 100, 100)
 ```
 
 ## Feature List
