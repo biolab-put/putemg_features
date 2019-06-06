@@ -29,7 +29,9 @@ import putemg_features
 import pandas as pd
 import numpy as np
 
-noise = pd.Series(np.concatenate((np.random.normal(0,1,100), np.random.normal(0,20,100), np.random.normal(0,5,100))))
+noise = pd.Series(np.concatenate((np.random.normal(0,1,100), 
+                                  np.random.normal(0,20,100), 
+                                  np.random.normal(0,5,100))))
 rms = putemg_features.feature_rms(noise, 100, 100)
 zc = putemg_features.feature_zc(noise, 100, 100)
 ```
