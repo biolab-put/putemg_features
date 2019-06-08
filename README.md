@@ -2,7 +2,7 @@
 Dedicated EMG feature calculator for putEMG dataset https://biolab.put.poznan.pl/putemg-dataset/
 
 ## Usage
-putemg_features can be used as Python3 module. In order to calculate features of a given hdf5 putEMG file based on XML feature descriptor file see example below. See "all_features.xml" for file format and feature list along with its parameters.
+putemg_features can be used as Python3 module. In order to calculate features of a given hdf5 putEMG file based on XML feature descriptor file see example below. See [all_features.xml](all_features.xml) for file format and feature list along with its parameters.
 
 ```python
 import putemg_features
@@ -12,7 +12,7 @@ hdf5_url = './putEMG/Data-HDF5/emg_gestures-03-repeats_long-2018-05-11-11-05-00-
 ft = putemg_features.features_from_xml(xml_url, hdf5_url)
 ```
 
-It is also possible to calculate desired single feature directly on already imported putEMG record. Avaiable features and its parameters are same as in "all_features.xml" file. Eg.:
+It is also possible to calculate desired single feature directly on already imported putEMG record. Avaiable features and its parameters are same as in [all_features.xml](all_features.xml) file. Eg.:
 ```python
 import putemg_features
 import pandas as pd
