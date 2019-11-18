@@ -57,6 +57,11 @@ def features_from_xml(xml_file_url, hdf5_file_url):
     :return: pandas.DataFrame - DataFrame containing output for all desired features
     """
     record: pd.DataFrame = pd.read_hdf(hdf5_file_url)  # Read HDF5 file into pandas DataFrame
+
+    return features_from_xml_on_df(xml_file_url, record)
+
+
+def features_from_xml_on_df(xml_file_url, record: pd.DataFrame):
     feature_frame = pd.DataFrame()
 
     xml_root = ET.parse(xml_file_url).getroot()  # Load XML file with feature config
