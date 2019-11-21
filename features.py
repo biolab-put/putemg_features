@@ -48,6 +48,32 @@ def calculate_feature(record: pd.DataFrame, name, **kwargs):
     return feature_values
 
 
+def calculate_force_feature(record: pd.DataFrame, name, **kwargs):
+    feature_func_name = 'force_feature_' + name.lower()  # Get feature function name based on name
+    feature_values = pd.DataFrame()  # Create empty DataFrame
+
+    start = time.time()
+    print('Calculating force feature ' + name + ':', end='', flush=True)
+    for column in record.filter(regex=r"FORCE_\d+"):  # For each column containing EMG data (for each Series)
+        print(' ' + column.split('_')[1], end='', flush=True)
+        feature_label = 'FORCE_' + name + '_' + column.split('_')[1]  # Prepare feature column label
+        # Call feature calculation by function name, and add to output DataFrame
+        feature = globals()[feature_func_name](record[column], **kwargs)
+        if isinstance(feature, pd.Series):
+            feature_values[feature_label] = feature
+        elif isinstance(feature, pd.DataFrame):
+            d = {}
+            for c in feature.columns:
+                d[c] = feature_label + "_" + c
+            feature = feature.rename(columns=d)
+            feature_values = feature_values.join(feature, how='outer')
+
+    print('', flush=True)
+    print("Elapsed time: {:.2f}s".format(time.time() - start))
+
+    return feature_values
+
+
 def features_from_xml(xml_file_url, hdf5_file_url):
     """
     Calculates feature defined in given XML file containing feature names and parameters. See 'all_features.xml' for
@@ -65,13 +91,32 @@ def features_from_xml_on_df(xml_file_url, record: pd.DataFrame):
     feature_frame = pd.DataFrame()
 
     xml_root = ET.parse(xml_file_url).getroot()  # Load XML file with feature config
+
+    windowing_entry = list(xml_root.iter('windowing'))[0]
+    windowing_options = biolab_utilities.convert_types_in_dict(windowing_entry.attrib)
+
     for xml_entry in xml_root.iter('feature'):  # For each feature entry in XML file
         # Convert attribute dictionary to Python literals
         xml_entry.attrib = biolab_utilities.convert_types_in_dict(xml_entry.attrib)
         # add to output frame values calculated by each feature function
-        feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib), how="outer")
+        feature_frame = feature_frame.join(calculate_feature(record, **xml_entry.attrib,
+                                                             window=windowing_options['window'],
+                                                             step=windowing_options['step']), how="outer")
 
-    for other_data in list(record.filter(regex="^(?!EMG_).*")):
+    for xml_entry in xml_root.iter('force_feature'):  # For each force feature entry in XML file
+        # Convert attribute dictionary to Python literals
+        xml_entry.attrib = biolab_utilities.convert_types_in_dict(xml_entry.attrib)
+        # add to output frame values calculated by each feature function
+        feature_frame = feature_frame.join(calculate_force_feature(record, **xml_entry.attrib,
+                                                                   window=windowing_options['window'],
+                                                                   step=windowing_options['step']), how="outer")
+
+    if len(list(xml_root.iter('force_feature'))):
+        re = "(^(?!EMG_|FORCE_).*)"
+    else:
+        re = "^(?!EMG_).*"
+
+    for other_data in list(record.filter(regex=re)):
         feature_frame[other_data] = record.loc[feature_frame.index, other_data]
 
     return feature_frame
@@ -469,3 +514,20 @@ def feature_psdfd(series, window, step, power_box_size_multiplier, subsampling):
     return pd.Series(data=np.apply_along_axis(lambda sig:
                                               box_counting_dimension(sig, power_box_size_multiplier, subsampling),
                                               axis=1, arr=power), index=series.index[indexes])
+
+
+def force_feature_mean(series, window, step):
+    """Mean value"""
+    windows_strided, indexes = biolab_utilities.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.mean(windows_strided, axis=1), index=series.index[indexes])
+
+
+def force_feature_median(series, window, step):
+    """Median value"""
+    windows_strided, indexes = biolab_utilities.moving_window_stride(series.values, window, step)
+    return pd.Series(data=np.median(windows_strided, axis=1), index=series.index[indexes])
+
+def force_feature_last(series, window, step):
+    """Last value of the window - resampling"""
+    windows_strided, indexes = biolab_utilities.moving_window_stride(series.values, window, step)
+    return pd.Series(data=windows_strided[::, -1], index=series.index[indexes])
