@@ -246,7 +246,7 @@ def feature_rms(series, window, step):
     return pd.Series(data=np.sqrt(np.mean(np.square(windows_strided), axis=1)), index=series.index[indexes])
 
 
-def feature_sampn(series, window, step, m, r):
+def feature_sampleen(series, window, step, m, r):
     """Sample Entropy
     SampEn feature is using PyEEG library v 0.02_r2 as it is, licensed with GNU GPL v3
     http://pyeeg.sourceforge.net/"""
